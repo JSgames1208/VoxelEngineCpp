@@ -11,10 +11,22 @@ BakedQuad FaceBakery::bakeQuad(vec3 min, vec3 max, Direction dir, BlockType type
 	float y1 = max.y;
 	float z1 = max.z;
 
-    AtlasTile tile = TextureAtlas::blockUVs[type];
+    BlockUV uvs = TextureAtlas::blockUVs[type];
+    AtlasTile faceUV;
 
-	float u0 = tile.u0, v0 = tile.v0;
-	float u1 = tile.u1, v1 = tile.v1;
+    switch (dir)
+    {
+        case Direction::UP:    faceUV = uvs.top; break;
+        case Direction::DOWN:  faceUV = uvs.bottom; break;
+        case Direction::NORTH: faceUV = uvs.north; break;
+        case Direction::SOUTH: faceUV = uvs.south; break;
+        case Direction::WEST:  faceUV = uvs.west; break;
+        case Direction::EAST:  faceUV = uvs.east; break;
+        default: faceUV = uvs.north; break;
+    }
+
+	float u0 = faceUV.u0, v0 = faceUV.v0;
+	float u1 = faceUV.u1, v1 = faceUV.v1;
 
 	BakedQuad quad;
 	quad.direction = dir;

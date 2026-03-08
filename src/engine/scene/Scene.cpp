@@ -10,14 +10,14 @@ Scene::Scene()
 		{
 			for (int z = 0; z < Chunk::SIZEZ; z++)
 			{
-				if ((x + y + z) % 2 == 1)
-				{
-					chunk.set(x, y, z, BlockType::SAND);
-				}
-				else
-				{
+				if (y == 0)
 					chunk.set(x, y, z, BlockType::BEDROCK);
-				}
+				else if (y > 0 && y < 58)
+					chunk.set(x, y, z, BlockType::STONE);
+				else if (y >= 58 && y < 63)
+					chunk.set(x, y, z, BlockType::DIRT);
+				else if (y >= 63)
+					chunk.set(x, y, z, BlockType::GRASS_BLOCK);
 			}
 		}
 	}
