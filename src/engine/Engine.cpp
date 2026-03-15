@@ -1,6 +1,9 @@
 #include "engine/Engine.h"
 #include <iostream>
 
+double fpsTimer = 0.0;
+int frameCount = 0;
+
 Engine::Engine()
 {
 	init();
@@ -14,14 +17,16 @@ int Engine::init()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	window = glfwCreateWindow(800, 600, "3d Engine", NULL, NULL);
+	window = glfwCreateWindow(1600, 1200, "3d Engine", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
 		return -1;
 	}
+
 	glfwMakeContextCurrent(window);
+	glfwSwapInterval(0);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
@@ -29,16 +34,16 @@ int Engine::init()
 		return -1;
 	}
 
-	glViewport(0, 0, 800, 600);
+	glViewport(0, 0, 1600, 1200);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
 
-	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	camera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f);
+	camera = std::make_unique<Camera>(glm::vec3(0.0f, 100.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f);
 	shader = std::make_unique<Shader>("shaders/vert.glsl", "shaders/frag.glsl");
 
 	meshManager = std::make_unique<MeshManager>();
@@ -65,6 +70,19 @@ int Engine::run()
 		float currentFrame = static_cast<float>(glfwGetTime());
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
+
+		fpsTimer += deltaTime;
+		frameCount++;
+
+		if (fpsTimer >= 1.0)
+		{
+			int fps = frameCount;
+			std::string title = "3D Engine - FPS: " + std::to_string(fps);
+			glfwSetWindowTitle(window, title.c_str());
+
+			frameCount = 0;
+			fpsTimer = 0.0;
+		}
 
 		processInput();
 		update(deltaTime);
@@ -94,7 +112,7 @@ void Engine::render()
 	shader->setMat4("view", view);
 
 	glm::mat4 projection = glm::mat4(1.0f);
-	projection = glm::perspective(glm::radians(45.0f), sizex / sizey, 0.1f, 1000.0f);
+	projection = glm::perspective(glm::radians(90.0f), sizex / sizey, 0.1f, 1000.0f);
 	shader->setMat4("projection", projection);
 
 	scene->update(deltaTime);
