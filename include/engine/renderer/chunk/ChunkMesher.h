@@ -3,6 +3,7 @@
 #include "engine/world/Chunk.h"
 #include "engine/renderer/block/BakedQuad.h"
 #include "engine/renderer/block/FaceBakery.h"
+#include "engine/world/World.h"
 
 class ChunkMesher
 {
@@ -11,55 +12,87 @@ public:
 
 	FaceBakery faceBakery;
 
-	bool isSolid(const Chunk& chunk, int x, int y, int z)
-	{
-		if (x < 0 || y < 0 || z < 0 || x >= Chunk::SIZEX || y >= Chunk::SIZEY || z >= Chunk::SIZEZ)
-		{
-			return false;
-		}
+	bool isSolidHybrid(const Chunk& chunk, const ChunkCoord& coord, World* world,
+                   int x, int y, int z)
+{
+    if (y < 0 || y >= Chunk::SIZEY)
+        return false;
 
-		return chunk.get(x, y, z) != BlockType::AIR;
-	}
+    if (x < 0)
+    {
+        Chunk* neighbor = world->getChunkPtr({coord.x - 1, coord.z});
+        if (!neighbor) return false;
+        return neighbor->get(Chunk::SIZEX - 1, y, z) != BlockType::AIR;
+    }
+    else if (x >= Chunk::SIZEX)
+    {
+        Chunk* neighbor = world->getChunkPtr({coord.x + 1, coord.z});
+        if (!neighbor) return false;
+        return neighbor->get(0, y, z) != BlockType::AIR;
+    }
 
-	std::vector<BakedQuad> meshChunk(const Chunk& chunk)
+    if (z < 0)
+    {
+        Chunk* neighbor = world->getChunkPtr({coord.x, coord.z - 1});
+        if (!neighbor) return false;
+        return neighbor->get(x, y, Chunk::SIZEZ - 1) != BlockType::AIR;
+    }
+    else if (z >= Chunk::SIZEZ)
+    {
+        Chunk* neighbor = world->getChunkPtr({coord.x, coord.z + 1});
+        if (!neighbor) return false;
+        return neighbor->get(x, y, 0) != BlockType::AIR;
+    }
+
+    return chunk.get(x, y, z) != BlockType::AIR;
+}
+
+	std::vector<BakedQuad> meshChunk(const Chunk& chunk, const ChunkCoord& coord, World* world)
 	{
 		std::vector<BakedQuad> quads;
 
-		for (int x = 0; x < Chunk::SIZEX; x++)
-		{
-			for (int y = 0; y < Chunk::SIZEY; y++)
-			{
-				for (int z = 0; z < Chunk::SIZEZ; z++)
-				{
-					BlockType type = chunk.get(x, y, z);
-					if (type == BlockType::AIR)
-					{
-						continue;
-					}
+        for (int x = 0; x < Chunk::SIZEX; x++)
+        {
+            for (int y = 0; y < Chunk::SIZEY; y++)
+            {
+                for (int z = 0; z < Chunk::SIZEZ; z++)
+                {
+                    BlockType type = chunk.get(x, y, z);
+                    if (type == BlockType::AIR)
+                        continue;
 
-					vec3 min(x, y, z);
-					vec3 max(x + 1, y + 1, z + 1);
+                    int worldX = coord.x * Chunk::SIZEX + x;
+                    int worldY = y;
+                    int worldZ = coord.z * Chunk::SIZEZ + z;
 
-					if (!isSolid(chunk, x, y + 1, z))
-						quads.push_back(faceBakery.bakeQuad(min, max, Direction::UP, type));
+                    vec3 min(x, y, z);
+                    vec3 max(x + 1, y + 1, z + 1);
 
-					if (!isSolid(chunk, x, y - 1, z))
-						quads.push_back(faceBakery.bakeQuad(min, max, Direction::DOWN, type));
+                    if (!isSolidHybrid(chunk, coord, world, x, y + 1, z))
+                    quads.push_back(faceBakery.bakeQuad(min, max, Direction::UP, type));
 
-					if (!isSolid(chunk, x, y, z - 1))
-						quads.push_back(faceBakery.bakeQuad(min, max, Direction::NORTH, type));
+                    // DOWN (-Y)
+                    if (!isSolidHybrid(chunk, coord, world, x, y - 1, z))
+                        quads.push_back(faceBakery.bakeQuad(min, max, Direction::DOWN, type));
 
-					if (!isSolid(chunk, x, y, z + 1))
-						quads.push_back(faceBakery.bakeQuad(min, max, Direction::SOUTH, type));
+                    // NORTH (-Z)
+                    if (!isSolidHybrid(chunk, coord, world, x, y, z - 1))
+                        quads.push_back(faceBakery.bakeQuad(min, max, Direction::NORTH, type));
 
-					if (!isSolid(chunk, x - 1, y, z))
-						quads.push_back(faceBakery.bakeQuad(min, max, Direction::WEST, type));
+                    // SOUTH (+Z)
+                    if (!isSolidHybrid(chunk, coord, world, x, y, z + 1))
+                        quads.push_back(faceBakery.bakeQuad(min, max, Direction::SOUTH, type));
 
-					if (!isSolid(chunk, x + 1, y, z))
-						quads.push_back(faceBakery.bakeQuad(min, max, Direction::EAST, type));
-				}
-			}
-		}
+                    // WEST (-X)
+                    if (!isSolidHybrid(chunk, coord, world, x - 1, y, z))
+                        quads.push_back(faceBakery.bakeQuad(min, max, Direction::WEST, type));
+
+                    // EAST (+X)
+                    if (!isSolidHybrid(chunk, coord, world, x + 1, y, z))
+                        quads.push_back(faceBakery.bakeQuad(min, max, Direction::EAST, type));
+                }
+            }
+        }
 
 		return quads;
 	}

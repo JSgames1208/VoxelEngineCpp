@@ -52,7 +52,7 @@ void Scene::update(float deltaTime)
 		world->addChunk(coord, std::move(chunk));
 
 		auto& chunkPtr = world->getChunk(coord);
-		auto quads = mesher.meshChunk(chunkPtr);
+		auto quads = mesher.meshChunk(chunkPtr, coord, world.get());
 		auto mesh = chunkRenderer.createMeshFromQuads(quads);
 		chunkMeshes.push_back(std::make_unique<ChunkMesh>(std::move(mesh), coord));
 	}
