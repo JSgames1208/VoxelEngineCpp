@@ -6,7 +6,7 @@ class Chunk
 {
 public:
 	static const int SIZEX = 16;
-	static const int SIZEY = 64;
+	static const int SIZEY = 128;
 	static const int SIZEZ = 16;
 	Chunk() = default;
 

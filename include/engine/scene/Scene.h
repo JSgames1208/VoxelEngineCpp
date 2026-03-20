@@ -10,6 +10,7 @@
 #include "engine/mesh/Mesh.h"
 #include "engine/world/World.h"
 #include "engine/core/ChunkCoord.h"
+#include "FastNoiseLite.h"
 
 struct PendingChunk {
 	PendingChunk(const ChunkCoord& _coord, std::unique_ptr<Chunk> _chunk)
@@ -41,10 +42,14 @@ public:
 	void render(Shader& shader);
 
 private:
+	float getHeight(int x, int z);
+
+private:
 	std::vector<Chunk> chunks;
 	std::vector<std::unique_ptr<ChunkMesh>> chunkMeshes;
 	std::vector<ChunkCoord> chunkQueue;
 	std::unique_ptr<World> world;
+	FastNoiseLite noise;
 	ChunkMesher mesher;
 	ChunkRenderer chunkRenderer;
 };
