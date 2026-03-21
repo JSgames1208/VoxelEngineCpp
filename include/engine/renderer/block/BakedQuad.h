@@ -9,6 +9,7 @@ struct Vertex
 {
 	vec3 position;
 	vec2 uv;
+	float ao;
 };
 
 struct BakedQuad
@@ -24,5 +25,10 @@ struct BakedQuad
 	const vec2 getUV(int i) const
 	{
 		return vertices[i].uv;
+	}
+
+	const float getAO(int i) const
+	{
+		return vertices[i].ao;
 	}
 };

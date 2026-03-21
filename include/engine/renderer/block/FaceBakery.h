@@ -8,6 +8,6 @@ class FaceBakery
 public:
 	FaceBakery() = default;
 
-	BakedQuad bakeQuad(vec3 min, vec3 max, Direction dir, BlockType type);
-	Vertex bakeVertex(float x, float y, float z, float u, float v);
+	BakedQuad bakeQuad(vec3 min, vec3 max, Direction dir, BlockType type, float ao[4]);
+	Vertex bakeVertex(float x, float y, float z, float u, float v, float ao);
 };

@@ -25,6 +25,7 @@ public:
 			{
 				auto pos = quad.getPosition(i);
 				auto uv = quad.getUV(i);
+				auto ao = quad.getAO(i);
 
 				vertices.push_back(pos.x);
 				vertices.push_back(pos.y);
@@ -36,6 +37,8 @@ public:
 
 				vertices.push_back(uv.x);
 				vertices.push_back(uv.y);
+
+				vertices.push_back(ao);
 			}
 
 			indices.push_back(indexOffset);

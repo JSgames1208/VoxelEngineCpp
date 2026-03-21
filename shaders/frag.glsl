@@ -4,6 +4,7 @@ out vec4 FragColor;
 in vec2 TexCoord;
 in vec3 Normal;
 in vec3 FragPos;
+in float AO;
 
 uniform sampler2D ourTexture;
 
@@ -17,8 +18,11 @@ void main()
 	// Ambient so shadows aren't black
 	float ambient = 0.65;
 
-	float lighting = ambient + diff * 0.6;
+	float lighting = ambient + diff * 0.75;
+
+	float minLight = 0.2;
+	float ao = mix(minLight, 1.0, AO);
 
 	vec3 texColor = texture(ourTexture, TexCoord).rgb;
-	FragColor = vec4(texColor * lighting, 1.0);
+	FragColor = vec4(texColor * lighting * ao, 1.0);
 }

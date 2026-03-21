@@ -8,7 +8,7 @@ Scene::Scene()
 	noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
 	noise.SetFrequency(0.01f);
 
-	int renderDistance = 10;
+	int renderDistance = 25;
 	for (int i = -renderDistance; i <= renderDistance; ++i)
 		for (int j = -renderDistance; j <= renderDistance; ++j)
 			chunkQueue.push_back(ChunkCoord(i, j));
