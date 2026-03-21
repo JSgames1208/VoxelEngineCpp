@@ -103,7 +103,8 @@ void Engine::update(float deltaTime)
 
 void Engine::render()
 {
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClearColor(130.0f / 256.0f, 200.0f / 256.0f, 229.0f / 256.0f, 1.0f);
+	//glClearColor(255.0f / 256.0f, 45.0f / 256.0f, 209.0f / 256.0f, 1.0f); // CURSED PURPLE (:<
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	shader->use();

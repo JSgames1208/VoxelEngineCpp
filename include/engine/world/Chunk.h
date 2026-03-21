@@ -10,6 +10,9 @@ public:
 	static const int SIZEZ = 16;
 	Chunk() = default;
 
+	bool isDirty = true;
+	bool isQueued = false;
+
 	BlockType blocks[SIZEX][SIZEY][SIZEZ];
 
 	BlockType get(int x, int y, int z) const
