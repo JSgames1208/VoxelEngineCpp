@@ -30,5 +30,17 @@ std::unordered_map<BlockType, BlockUV> TextureAtlas::blockUVs = {
     )},
     { BlockType::ICE, makeUniformTile(
         {0.25f, 0.5f, 0.5f, 0.75f}
+    )},
+    { BlockType::SAND, makeUniformTile(
+        {0.75f, 0.5f, 1.0f, 0.75f}
+    )},
+    { BlockType::OBSIDIAN, makeUniformTile(
+        {0.5f, 0.5f, 0.75f, 0.75f}
+    )},
+    { BlockType::SNOW_BLOCK, makeUniformTile(
+        {0.5f, 0.25f, 0.75f, 0.5f}
+    )},
+    { BlockType::COBBLESTONE, makeUniformTile(
+        {0.0f, 0.25f, 0.25f, 0.5f}
     )}
 };
