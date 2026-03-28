@@ -1,0 +1,145 @@
+#include "engine/gen/ChunkGenerator.h"
+
+ChunkGenerator::ChunkGenerator(World* world)
+	: world(world)
+{
+	noise.SetSeed(100);
+	noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+	noise.SetFrequency(0.01f);
+}
+
+void ChunkGenerator::queueChunk(const ChunkCoord& coord)
+{
+	chunkQueue.push(coord);
+}
+
+void ChunkGenerator::start()
+{
+	running = true;
+	worker = std::thread(&ChunkGenerator::workerLoop, this);
+}
+
+void ChunkGenerator::stop()
+{
+	running = false;
+	if (worker.joinable())
+		worker.join();
+}
+
+void ChunkGenerator::workerLoop()
+{
+	while (running) {
+		ChunkCoord coord;
+
+		{
+			std::lock_guard<std::mutex> lock(queueMutex);
+			if (chunkQueue.empty())
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds(5));
+				continue;
+			}
+			coord = chunkQueue.front();
+			chunkQueue.pop();
+		}
+
+		auto chunk = generateChunk(coord);
+
+		{
+			std::lock_guard<std::mutex> lock(generatedMutex);
+			generatedChunks.push(std::move(chunk));
+		}
+	}
+}
+
+bool ChunkGenerator::hasGeneratedChunks()
+{
+	std::lock_guard<std::mutex> lock(generatedMutex);
+	return (!generatedChunks.empty());
+}
+
+std::unique_ptr<Chunk> ChunkGenerator::fetchGeneratedChunk()
+{
+	std::lock_guard<std::mutex> lock(generatedMutex);
+	if (generatedChunks.empty()) return nullptr;
+
+	auto chunk = std::move(generatedChunks.front());
+	generatedChunks.pop();
+	return chunk;
+}
+
+std::unique_ptr<Chunk> ChunkGenerator::generateChunk(const ChunkCoord& coord) 
+{
+	auto chunk = std::make_unique<Chunk>(coord);
+
+	for (int x = 0; x < Chunk::SIZEX; x++)
+	{
+		for (int z = 0; z < Chunk::SIZEZ; z++)
+		{
+			int worldX = coord.x * Chunk::SIZEX + x;
+			int worldZ = coord.z * Chunk::SIZEZ + z;
+
+			int height = static_cast<int>(64 + noise.GetNoise(worldX * 0.1f, worldZ * 0.1f) * 20);
+
+			for (int y = 0; y < Chunk::SIZEY; y++)
+			{
+				BlockType block = BlockType::AIR;
+				if (y == 0)
+					block = BlockType::BEDROCK;
+				else if (y < height - 4)
+					block = BlockType::STONE;
+				else if (y < height)
+					block = BlockType::DIRT;
+				else if (y == height)
+					block = BlockType::GRASS_BLOCK;
+
+				chunk->set(x, y, z, block);
+			}
+		}
+	}
+
+	return chunk;
+}
+
+void ChunkGenerator::markChunkDirty(const ChunkCoord& coord)
+{
+	if (chunkDirtyMap[coord]) return;
+
+	chunkDirtyMap[coord] = true;
+	dirtyQueue.push(coord);
+}
+
+bool ChunkGenerator::hasDirtyChunks()
+{
+	return (!dirtyQueue.empty());
+}
+
+ChunkCoord ChunkGenerator::popDirtyChunk()
+{
+	if (!hasDirtyChunks()) return { 0, 0 };
+
+	ChunkCoord coord = dirtyQueue.front();
+	dirtyQueue.pop();
+
+	chunkDirtyMap[coord] = false;
+
+	return coord;
+}
+
+void ChunkGenerator::processChunks(int chunksPerFrame)
+{
+	for (int i = 0; i < chunksPerFrame && !chunkQueue.empty(); i++)
+	{
+		ChunkCoord coord = chunkQueue.front();
+		chunkQueue.pop();
+
+		auto chunk = generateChunk(coord);
+		world->addChunk(coord, std::move(chunk));
+
+		markChunkDirty(coord);
+
+		markChunkDirty({ coord.x + 1, coord.z });
+		markChunkDirty({ coord.x - 1, coord.z });
+		markChunkDirty({ coord.x, coord.z + 1 });
+		markChunkDirty({ coord.x, coord.z - 1 });
+	}
+}

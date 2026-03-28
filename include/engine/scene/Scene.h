@@ -12,7 +12,7 @@
 #include "engine/mesh/Mesh.h"
 #include "engine/world/World.h"
 #include "engine/core/ChunkCoord.h"
-#include "FastNoiseLite.h"
+#include "engine/gen/ChunkGenerator.h"
 
 struct PendingChunk {
 	PendingChunk(const ChunkCoord& _coord, std::unique_ptr<Chunk> _chunk)
@@ -39,22 +39,19 @@ class Scene
 {
 public:
 	Scene();
+	~Scene();
 
 	void update(float deltaTime);
 	void render(Shader& shader);
-
-	void markChunkDirty(const ChunkCoord& coord);
 private:
-	float getHeight(int x, int z);
+	void markChunkDirty(const ChunkCoord& coord);
 	void updateChunkMesh(const ChunkCoord& coord, std::unique_ptr<Mesh> mesh);
-
 private:
 	std::vector<Chunk> chunks;
 	std::unordered_map<ChunkCoord, std::unique_ptr<ChunkMesh>> chunkMeshes;
-	std::vector<ChunkCoord> chunkQueue;
 	std::unique_ptr<World> world;
+	std::unique_ptr<ChunkGenerator> generator;
 	std::queue<ChunkCoord> dirtyQueue;
-	FastNoiseLite noise;
 	ChunkMesher mesher;
 	ChunkRenderer chunkRenderer;
 };

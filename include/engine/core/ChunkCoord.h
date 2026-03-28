@@ -1,7 +1,9 @@
 #pragma once
+#include <unordered_map>
 
 struct ChunkCoord
 {
+    ChunkCoord() = default;
 	ChunkCoord(int _x, int _z) 
 	{
 		x = _x;
