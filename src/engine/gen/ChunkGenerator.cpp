@@ -15,15 +15,21 @@ void ChunkGenerator::queueChunk(const ChunkCoord& coord)
 
 void ChunkGenerator::start()
 {
+	int threadCount = std::min(4u, std::thread::hardware_concurrency());
 	running = true;
-	worker = std::thread(&ChunkGenerator::workerLoop, this);
+	for (int i = 0; i < threadCount; i++)
+	{
+		workers.emplace_back(std::thread(&ChunkGenerator::workerLoop, this));
+	}
 }
 
 void ChunkGenerator::stop()
 {
 	running = false;
-	if (worker.joinable())
-		worker.join();
+	for (auto& t : workers)
+	{
+		if (t.joinable()) t.join();
+	}
 }
 
 void ChunkGenerator::workerLoop()
@@ -35,7 +41,6 @@ void ChunkGenerator::workerLoop()
 			std::lock_guard<std::mutex> lock(queueMutex);
 			if (chunkQueue.empty())
 			{
-				std::this_thread::sleep_for(std::chrono::milliseconds(5));
 				continue;
 			}
 			coord = chunkQueue.front();
@@ -78,7 +83,7 @@ std::unique_ptr<Chunk> ChunkGenerator::generateChunk(const ChunkCoord& coord)
 			int worldX = coord.x * Chunk::SIZEX + x;
 			int worldZ = coord.z * Chunk::SIZEZ + z;
 
-			int height = static_cast<int>(64 + noise.GetNoise(worldX * 0.1f, worldZ * 0.1f) * 20);
+			int height = static_cast<int>(64 + noise.GetNoise(worldX * 0.5f, worldZ * 0.5f) * 20);
 
 			for (int y = 0; y < Chunk::SIZEY; y++)
 			{

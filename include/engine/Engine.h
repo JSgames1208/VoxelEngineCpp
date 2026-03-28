@@ -27,8 +27,8 @@ private:
 	void processInput();
 	void setupCallbacks();
 
-	float sizex = 800.0f;
-	float sizey = 600.0f;
+	float sizex = 2400.0f;
+	float sizey = 1800.0f;
 
 	float lastX = 400.0f;
 	float lastY = 300.0f;

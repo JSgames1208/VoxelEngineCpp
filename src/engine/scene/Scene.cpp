@@ -7,6 +7,7 @@ Scene::Scene()
 	generator = std::make_unique<ChunkGenerator>(world.get());
 
 	int renderDistance = 50;
+	totalChunksToGenerate = (2 * renderDistance + 1) * (2 * renderDistance + 1);
 
 	for (int r = 0; r <= renderDistance; r++)
 	{
@@ -22,6 +23,9 @@ Scene::Scene()
 		}
 	}
 
+	startTime = std::chrono::high_resolution_clock::now();
+	timingStarted = true;
+
 	generator->start();
 }
 
@@ -36,6 +40,19 @@ void Scene::update(float deltaTime)
 		auto chunk = generator->fetchGeneratedChunk();
 		if (!chunk) continue;
 
+		generatedCount++;
+
+		if (generatedCount == totalChunksToGenerate && timingStarted)
+		{
+			auto endTime = std::chrono::high_resolution_clock::now();
+			double ms = std::chrono::duration<double, std::milli>(endTime - startTime).count();
+
+			std::cout << "Generated all chunks in: " << ms << " ms ("
+				<< ms / 1000.0 << " seconds)\n";
+
+			timingStarted = false;
+		}
+
 		ChunkCoord coord = chunk->coord;
 		world->addChunk(coord, std::move(chunk));
 
@@ -47,7 +64,7 @@ void Scene::update(float deltaTime)
 		markChunkDirty({ coord.x, coord.z - 1 });
 	}
 
-	int meshesPerFrame = 2;
+	int meshesPerFrame = 1;
 
 	for (int i = 0; i < meshesPerFrame && !dirtyQueue.empty(); ++i)
 	{

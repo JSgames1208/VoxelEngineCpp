@@ -13,6 +13,7 @@
 #include "engine/world/World.h"
 #include "engine/core/ChunkCoord.h"
 #include "engine/gen/ChunkGenerator.h"
+#include <chrono>
 
 struct PendingChunk {
 	PendingChunk(const ChunkCoord& _coord, std::unique_ptr<Chunk> _chunk)
@@ -54,4 +55,10 @@ private:
 	std::queue<ChunkCoord> dirtyQueue;
 	ChunkMesher mesher;
 	ChunkRenderer chunkRenderer;
+
+	int totalChunksToGenerate = 0;
+	int generatedCount = 0;
+	bool timingStarted = false;
+
+	std::chrono::high_resolution_clock::time_point startTime;
 };

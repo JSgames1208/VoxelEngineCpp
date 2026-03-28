@@ -36,10 +36,9 @@ private:
 	std::queue<ChunkCoord> dirtyQueue;
 	std::unordered_map<ChunkCoord, bool> chunkDirtyMap;
 
-
 	void markChunkDirty(const ChunkCoord& coord);
 	
-	std::thread worker;
+	std::vector<std::thread> workers;
 	std::atomic<bool> running = false;
 
 	std::unique_ptr<Chunk> generateChunk(const ChunkCoord& coord);

@@ -17,7 +17,7 @@ int Engine::init()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	window = glfwCreateWindow(1600, 1200, "3d Engine", NULL, NULL);
+	window = glfwCreateWindow(sizex, sizey, "3d Engine", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -34,7 +34,7 @@ int Engine::init()
 		return -1;
 	}
 
-	glViewport(0, 0, 1600, 1200);
+	glViewport(0, 0, sizex, sizey);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -43,7 +43,7 @@ int Engine::init()
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	camera = std::make_unique<Camera>(glm::vec3(0.0f, 100.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f);
+	camera = std::make_unique<Camera>(glm::vec3(0.0f, 150.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f);
 	shader = std::make_unique<Shader>("shaders/vert.glsl", "shaders/frag.glsl");
 
 	meshManager = std::make_unique<MeshManager>();
