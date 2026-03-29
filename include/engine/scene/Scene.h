@@ -7,12 +7,13 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "engine/Shader.h"
 #include "engine/world/Chunk.h"
-#include "engine/renderer/chunk/ChunkMesher.h"
+#include "engine/mesh/ChunkMesher.h"
 #include "engine/renderer/chunk/ChunkRenderer.h"
 #include "engine/mesh/Mesh.h"
 #include "engine/world/World.h"
 #include "engine/core/ChunkCoord.h"
 #include "engine/gen/ChunkGenerator.h"
+#include "engine/mesh/ThreadedChunkMesher.h"
 #include <chrono>
 
 struct PendingChunk {
@@ -52,6 +53,7 @@ private:
 	std::unordered_map<ChunkCoord, std::unique_ptr<ChunkMesh>> chunkMeshes;
 	std::unique_ptr<World> world;
 	std::unique_ptr<ChunkGenerator> generator;
+	std::unique_ptr<ThreadedChunkMesher> threadedMesher;
 	std::queue<ChunkCoord> dirtyQueue;
 	ChunkMesher mesher;
 	ChunkRenderer chunkRenderer;

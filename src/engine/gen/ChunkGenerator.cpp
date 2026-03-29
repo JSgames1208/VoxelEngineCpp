@@ -34,7 +34,8 @@ void ChunkGenerator::stop()
 
 void ChunkGenerator::workerLoop()
 {
-	while (running) {
+	while (running) 
+	{
 		ChunkCoord coord;
 
 		{

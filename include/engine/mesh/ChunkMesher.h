@@ -54,7 +54,7 @@ public:
     return chunk.get(x, y, z) != BlockType::AIR;
 }
 
-	std::vector<BakedQuad> meshChunk(const Chunk& chunk, const ChunkCoord& coord, World* world)
+	std::unique_ptr<std::vector<BakedQuad>> meshChunk(const Chunk& chunk, const ChunkCoord& coord, World* world)
 	{
 		std::vector<BakedQuad> quads;
 
@@ -213,6 +213,6 @@ public:
             }
         }
 
-		return quads;
+		return std::make_unique<std::vector<BakedQuad>>(quads);
 	}
 };

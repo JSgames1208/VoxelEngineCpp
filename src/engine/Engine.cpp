@@ -11,7 +11,7 @@ Engine::Engine()
 
 int Engine::init()
 {
-	std::cout << "working" << std::endl;
+	std::cout << "~~3D Voxel Engine~~" << std::endl;
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);

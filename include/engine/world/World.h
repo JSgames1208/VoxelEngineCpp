@@ -3,6 +3,7 @@
 #include <memory>
 #include "engine/core/ChunkCoord.h"
 #include "engine/world/Chunk.h"
+#include <mutex>
 
 class World
 {
@@ -11,6 +12,7 @@ public:
 
 	void addChunk(ChunkCoord& coord, std::unique_ptr<Chunk> chunk)
 	{
+		std::lock_guard<std::mutex> lock(chunkMutex);
 		chunks.emplace(coord, std::move(chunk));
 	}
 
@@ -21,6 +23,7 @@ public:
 
 	Chunk* World::getChunkPtr(ChunkCoord coord)
 	{
+		std::lock_guard<std::mutex> lock(chunkMutex);
 		auto it = chunks.find(coord);
 		if (it == chunks.end())
 			return nullptr;
@@ -50,4 +53,5 @@ public:
 
 	std::unordered_map<ChunkCoord, std::unique_ptr<Chunk>> chunks;
 private:
+	std::mutex chunkMutex;
 };

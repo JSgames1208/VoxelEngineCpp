@@ -5,8 +5,9 @@ Scene::Scene()
 	: world(std::make_unique<World>())
 {
 	generator = std::make_unique<ChunkGenerator>(world.get());
+	threadedMesher = std::make_unique<ThreadedChunkMesher>(world.get());
 
-	int renderDistance = 50;
+	int renderDistance = 25;
 	totalChunksToGenerate = (2 * renderDistance + 1) * (2 * renderDistance + 1);
 
 	for (int r = 0; r <= renderDistance; r++)
@@ -27,11 +28,13 @@ Scene::Scene()
 	timingStarted = true;
 
 	generator->start();
+	threadedMesher->start();
 }
 
 Scene::~Scene()
 {
 	generator->stop();
+	threadedMesher->stop();
 }
 
 void Scene::update(float deltaTime)
@@ -47,8 +50,7 @@ void Scene::update(float deltaTime)
 			auto endTime = std::chrono::high_resolution_clock::now();
 			double ms = std::chrono::duration<double, std::milli>(endTime - startTime).count();
 
-			std::cout << "Generated all chunks in: " << ms << " ms ("
-				<< ms / 1000.0 << " seconds)\n";
+			std::cout << "Generated all chunks in: " << ms << " ms (" << ms / 1000.0 << " seconds)\n";
 
 			timingStarted = false;
 		}
@@ -62,24 +64,33 @@ void Scene::update(float deltaTime)
 		markChunkDirty({ coord.x - 1, coord.z });
 		markChunkDirty({ coord.x, coord.z + 1 });
 		markChunkDirty({ coord.x, coord.z - 1 });
+
+		while (!dirtyQueue.empty()) {
+			ChunkCoord dirtyCoord = dirtyQueue.front();
+			dirtyQueue.pop();
+
+			Chunk* dirtyChunk = world->getChunkPtr(dirtyCoord);
+			if (!dirtyChunk) continue;
+
+			threadedMesher->queueChunk(dirtyCoord);
+		}
 	}
 
-	int meshesPerFrame = 1;
-
-	for (int i = 0; i < meshesPerFrame && !dirtyQueue.empty(); ++i)
+	int meshesPerFrame = 2;
+	for (int i = 0; i < meshesPerFrame && threadedMesher->hasFinishedMeshes(); ++i)
 	{
-		ChunkCoord coord = dirtyQueue.front();
-		dirtyQueue.pop();
+		auto [coord, quads] = threadedMesher->fetchFinishedMesh();
+		if (!quads) continue;
 
-		Chunk* chunk = world->getChunkPtr(coord);
-		if (!chunk) continue;
-
-		auto quads = mesher.meshChunk(*chunk, coord, world.get());
-		std::unique_ptr<Mesh> mesh = chunkRenderer.createMeshFromQuads(quads);
+		auto mesh = threadedMesher->createMeshFromQuads(*quads);
 		updateChunkMesh(coord, std::move(mesh));
 
-		chunk->isDirty = false;
-		chunk->isQueued = false;
+		Chunk* chunk = world->getChunkPtr(coord);
+		if (chunk)
+		{
+			chunk->isDirty = false;
+			chunk->isQueued = false;
+		}
 	}
 }
 
