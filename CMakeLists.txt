@@ -22,10 +22,11 @@ set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 add_subdirectory(external/glfw ${CMAKE_BINARY_DIR}/glfw_build)
 
 add_executable(${PROJECT_NAME} "src/engine/main.cpp" "src/engine/Engine.cpp" "src/engine/Shader.cpp" "src/engine/Camera.cpp" "src/engine/texture/Texture.cpp"
-"src/engine/texture/TextureManager.cpp" "src/engine/scene/Scene.cpp" "src/engine/mesh/Mesh.cpp" "src/engine/mesh/Meshmanager.cpp" "src/engine/renderer/block/BakedQuad.cpp" "src/engine/renderer/block/FaceBakery.cpp" "src/engine/texture/TextureAtlas.cpp" "src/engine/gen/ChunkGenerator.cpp" "include/engine/mesh/ThreadedChunkMesher.h" "src/engine/mesh/ThreadedChunkMesher.cpp")
+"src/engine/texture/TextureManager.cpp" "src/engine/scene/Scene.cpp" "src/engine/mesh/Mesh.cpp" "src/engine/mesh/Meshmanager.cpp" "src/engine/renderer/block/BakedQuad.cpp" "src/engine/renderer/block/FaceBakery.cpp" "src/engine/texture/TextureAtlas.cpp" "src/engine/gen/ChunkGenerator.cpp" "include/engine/mesh/ThreadedChunkMesher.h" "src/engine/mesh/ThreadedChunkMesher.cpp" "src/engine/world/block/BlockHelpers.cpp")
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
 file(COPY ${CMAKE_SOURCE_DIR}/shaders DESTINATION ${CMAKE_BINARY_DIR})
 file(COPY ${CMAKE_SOURCE_DIR}/textures DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/data DESTINATION ${CMAKE_BINARY_DIR})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE glad glfw opengl32 glm::glm)

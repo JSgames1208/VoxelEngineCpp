@@ -49,13 +49,14 @@ private:
 	void markChunkDirty(const ChunkCoord& coord);
 	void updateChunkMesh(const ChunkCoord& coord, std::unique_ptr<Mesh> mesh);
 private:
+	std::unique_ptr<ChunkMesher> mesher;
 	std::vector<Chunk> chunks;
 	std::unordered_map<ChunkCoord, std::unique_ptr<ChunkMesh>> chunkMeshes;
 	std::unique_ptr<World> world;
 	std::unique_ptr<ChunkGenerator> generator;
 	std::unique_ptr<ThreadedChunkMesher> threadedMesher;
 	std::queue<ChunkCoord> dirtyQueue;
-	ChunkMesher mesher;
+	std::unique_ptr<TextureAtlas> atlas;
 	ChunkRenderer chunkRenderer;
 
 	int totalChunksToGenerate = 0;

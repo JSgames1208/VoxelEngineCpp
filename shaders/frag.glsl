@@ -23,6 +23,6 @@ void main()
 	float minLight = 0.2;
 	float ao = mix(minLight, 1.0, AO);
 
-	vec3 texColor = texture(ourTexture, TexCoord).rgb;
-	FragColor = vec4(texColor * lighting * ao, 1.0);
+	vec4 texColor = texture(ourTexture, TexCoord);
+	FragColor = vec4(texColor.rgb * lighting * ao, texColor.a);
 }

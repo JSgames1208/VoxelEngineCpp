@@ -3,14 +3,14 @@
 #include "engine/world/Chunk.h"
 #include "engine/renderer/block/BakedQuad.h"
 #include "engine/renderer/block/FaceBakery.h"
+#include "engine/texture/TextureAtlas.h"
 #include "engine/world/World.h"
 
 class ChunkMesher
 {
 public:
-	ChunkMesher() = default;
-
-	FaceBakery faceBakery;
+    ChunkMesher(TextureAtlas* atlas)
+        : atlas(atlas) { }
 
     float getAO(bool side1, bool side2, bool corner)
     {
@@ -95,7 +95,7 @@ public:
                         ao[2] = getAO(e, s, se);
                         ao[3] = getAO(w, s, sw);
 
-                        quads.push_back(faceBakery.bakeQuad(min, max, Direction::UP, type, ao));
+                        quads.push_back(faceBakery.bakeQuad(min, max, Direction::UP, type, ao, atlas));
                     }
 
                     // DOWN (-Y)
@@ -118,7 +118,7 @@ public:
                         ao[2] = getAO(e, n, ne);
                         ao[3] = getAO(w, n, nw);
 
-                        quads.push_back(faceBakery.bakeQuad(min, max, Direction::DOWN, type, ao));
+                        quads.push_back(faceBakery.bakeQuad(min, max, Direction::DOWN, type, ao, atlas));
                     }
 
                     // NORTH (-Z)
@@ -141,7 +141,7 @@ public:
                         ao[2] = getAO(e, u, ue);
                         ao[3] = getAO(w, u, uw);
 
-                        quads.push_back(faceBakery.bakeQuad(min, max, Direction::NORTH, type, ao));
+                        quads.push_back(faceBakery.bakeQuad(min, max, Direction::NORTH, type, ao, atlas));
                     }
 
                     // SOUTH (+Z)
@@ -163,7 +163,7 @@ public:
                         ao[2] = getAO(w, u, uw);
                         ao[3] = getAO(e, u, ue);
 
-                        quads.push_back(faceBakery.bakeQuad(min, max, Direction::SOUTH, type, ao));
+                        quads.push_back(faceBakery.bakeQuad(min, max, Direction::SOUTH, type, ao, atlas));
                     }
 
                     // WEST (-X)
@@ -185,7 +185,7 @@ public:
                         ao[2] = getAO(n, u, un);
                         ao[3] = getAO(s, u, us);
 
-                        quads.push_back(faceBakery.bakeQuad(min, max, Direction::WEST, type, ao));
+                        quads.push_back(faceBakery.bakeQuad(min, max, Direction::WEST, type, ao, atlas));
                     }
 
                     // EAST (+X)
@@ -207,7 +207,7 @@ public:
                         ao[2] = getAO(s, u, us);
                         ao[3] = getAO(n, u, un);
 
-                        quads.push_back(faceBakery.bakeQuad(min, max, Direction::EAST, type, ao));
+                        quads.push_back(faceBakery.bakeQuad(min, max, Direction::EAST, type, ao, atlas));
                     }
                 }
             }
@@ -215,4 +215,7 @@ public:
 
 		return std::make_unique<std::vector<BakedQuad>>(quads);
 	}
+private:
+    FaceBakery faceBakery;
+    TextureAtlas* atlas;
 };

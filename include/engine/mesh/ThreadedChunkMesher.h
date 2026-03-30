@@ -9,10 +9,10 @@
 #include <vector>
 #include <atomic>
 
-class ThreadedChunkMesher 
+class ThreadedChunkMesher
 {
 public:
-	ThreadedChunkMesher(World* world);
+	ThreadedChunkMesher(World* world, ChunkMesher* mesher);
 	~ThreadedChunkMesher() = default;
 
 	void queueChunk(const ChunkCoord& coord);
@@ -25,7 +25,7 @@ public:
 	std::unique_ptr<Mesh> createMeshFromQuads(const std::vector<BakedQuad>& quads);
 private:
 	World* world;
-	ChunkMesher mesher;
+	ChunkMesher* mesher;
 
 	std::queue<ChunkCoord> meshingQueue;
 	std::mutex queueMutex;

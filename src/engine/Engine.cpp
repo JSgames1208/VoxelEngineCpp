@@ -38,6 +38,8 @@ int Engine::init()
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
 
@@ -58,7 +60,7 @@ int Engine::init()
 
 	shader->setMat4("model", model);
 
-	Texture texture("textures/textureAtlas.jpg");
+	texture = std::make_unique<Texture>("textures/texture_atlas.png");
 
 	return 0;
 }

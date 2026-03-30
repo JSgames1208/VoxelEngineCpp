@@ -1,8 +1,10 @@
 #include "engine/mesh/ThreadedChunkMesher.h"
 #include <iostream>
+#include <chrono>
 
-ThreadedChunkMesher::ThreadedChunkMesher(World* world)
+ThreadedChunkMesher::ThreadedChunkMesher(World* world, ChunkMesher* mesher)
 	: world(world)
+	, mesher(mesher)
 {
 }
 
@@ -72,7 +74,14 @@ std::unique_ptr<Mesh> ThreadedChunkMesher::createMeshFromQuads(const std::vector
 	}
 
 	auto mesh = std::make_unique<Mesh>();
+
+	auto start = std::chrono::high_resolution_clock::now();
+
 	mesh->setData(vertices, indices);
+
+	auto end = std::chrono::high_resolution_clock::now();
+	double ms = std::chrono::duration<double, std::milli>(end - start).count();
+
 	return mesh;
 }
 
@@ -95,7 +104,7 @@ void ThreadedChunkMesher::workerLoop()
 		Chunk* chunk = world->getChunkPtr(coord);
 		if (!chunk) continue;
 
-		auto quads = mesher.meshChunk(*chunk, coord, world);
+		auto quads = mesher->meshChunk(*chunk, coord, world);
 
 		{
 			std::lock_guard<std::mutex> lock(finishedMutex);

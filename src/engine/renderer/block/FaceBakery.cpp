@@ -1,7 +1,7 @@
 #include "engine/renderer/block/FaceBakery.h"
 #include "engine/texture/TextureAtlas.h"
 
-BakedQuad FaceBakery::bakeQuad(vec3 min, vec3 max, Direction dir, BlockType type, float ao[4])
+BakedQuad FaceBakery::bakeQuad(vec3 min, vec3 max, Direction dir, BlockType type, float ao[4], TextureAtlas* atlas)
 {
 	float x0 = min.x;
 	float y0 = min.y;
@@ -11,22 +11,31 @@ BakedQuad FaceBakery::bakeQuad(vec3 min, vec3 max, Direction dir, BlockType type
 	float y1 = max.y;
 	float z1 = max.z;
 
-    BlockUV uvs = TextureAtlas::blockUVs[type];
-    AtlasTile faceUV;
-
-    switch (dir)
-    {
-        case Direction::UP:    faceUV = uvs.top; break;
-        case Direction::DOWN:  faceUV = uvs.bottom; break;
-        case Direction::NORTH: faceUV = uvs.north; break;
-        case Direction::SOUTH: faceUV = uvs.south; break;
-        case Direction::WEST:  faceUV = uvs.west; break;
-        case Direction::EAST:  faceUV = uvs.east; break;
-        default: faceUV = uvs.north; break;
+    if (!atlas) {
+        std::cout << "[ERROR] atlas pointer is null! Cannot get block faces.\n";
+        return {};
     }
 
-	float u0 = faceUV.u0, v0 = faceUV.v0;
-	float u1 = faceUV.u1, v1 = faceUV.v1;
+    auto faces = atlas->getBlockFaces(type);
+
+    int faceIndex;
+    switch (dir)
+    {
+        case Direction::UP:    faceIndex = faces[0]; break;
+        case Direction::DOWN:  faceIndex = faces[1]; break;
+        case Direction::NORTH: faceIndex = faces[2]; break;
+        case Direction::SOUTH: faceIndex = faces[3]; break;
+        case Direction::WEST:  faceIndex = faces[4]; break;
+        case Direction::EAST:  faceIndex = faces[5]; break;
+        default: faceIndex = faces[2]; break;
+    }
+
+    AtlasUV uv = getUVFromIndex(faceIndex, 5);
+
+    float u0 = uv.u0;
+    float v0 = uv.v0;
+    float u1 = uv.u1;
+    float v1 = uv.v1;
 
 	BakedQuad quad;
 	quad.direction = dir;

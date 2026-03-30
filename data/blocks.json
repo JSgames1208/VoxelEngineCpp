@@ -1,0 +1,14 @@
+{
+    "grass_block": [ "grass_block_top", "dirt", "grass_block_side", "grass_block_side", "grass_block_side", "grass_block_side" ],
+    "dirt": [ "dirt", "dirt", "dirt", "dirt", "dirt", "dirt" ],
+    "stone": [ "stone", "stone", "stone", "stone", "stone", "stone" ],
+    "bedrock": [ "bedrock", "bedrock", "bedrock", "bedrock", "bedrock", "bedrock" ],
+    "log": [ "log_top", "log_top", "log_side", "log_side", "log_side", "log_side" ],
+    "gravel": [ "gravel", "gravel", "gravel", "gravel", "gravel", "gravel" ],
+    "ice": [ "ice", "ice", "ice", "ice", "ice", "ice" ],
+    "sand": [ "sand", "sand", "sand", "sand", "sand", "sand" ],
+    "obsidian": [ "obsidian", "obsidian", "obsidian", "obsidian", "obsidian", "obsidian" ],
+    "snow_block": [ "snow_block", "snow_block", "snow_block", "snow_block", "snow_block", "snow_block" ],
+    "cobblestone": [ "cobblestone", "cobblestone", "cobblestone", "cobblestone", "cobblestone", "cobblestone" ],
+    "air": [ "air", "air", "air", "air", "air", "air" ]
+}

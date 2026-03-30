@@ -2,32 +2,41 @@
 #include "engine/world/World.h"
 
 Scene::Scene()
-	: world(std::make_unique<World>())
 {
-	generator = std::make_unique<ChunkGenerator>(world.get());
-	threadedMesher = std::make_unique<ThreadedChunkMesher>(world.get());
+	world = std::make_unique<World>();
 
-	int renderDistance = 25;
-	totalChunksToGenerate = (2 * renderDistance + 1) * (2 * renderDistance + 1);
-
-	for (int r = 0; r <= renderDistance; r++)
-	{
-		for (int x = -r; x <= r; x++)
-		{
-			for (int z = -r; z <= r; z++)
-			{
-				if (abs(x) == r || abs(z) == r)
-				{
-					generator->queueChunk({ x, z });
-				}
-			}
-		}
+	// 2. Create the atlas
+	atlas = std::make_unique<TextureAtlas>();
+	if (!atlas->loadFromJSON()) {
+		std::cerr << "Failed to load textures!\n";
+		return;
 	}
 
+	// 3. Create the mesher with the atlas pointer
+	mesher = std::make_unique<ChunkMesher>(atlas.get());
+
+	// 4. Threaded mesher gets a pointer to mesher (safe)
+	threadedMesher = std::make_unique<ThreadedChunkMesher>(world.get(), mesher.get());
+
+	// 5. Chunk generator
+	generator = std::make_unique<ChunkGenerator>(world.get());
+
+	std::cout << "loaded generator and mesher" << std::endl;
+
+	// 6. Queue chunks
+	int renderDistance = 25;
+	totalChunksToGenerate = (2 * renderDistance + 1) * (2 * renderDistance + 1);
+	for (int r = 0; r <= renderDistance; r++)
+		for (int x = -r; x <= r; x++)
+			for (int z = -r; z <= r; z++)
+				if (abs(x) == r || abs(z) == r)
+					generator->queueChunk({ x, z });
+
+	// 7. Start timing and generation
 	startTime = std::chrono::high_resolution_clock::now();
 	timingStarted = true;
-
 	generator->start();
+
 	threadedMesher->start();
 }
 

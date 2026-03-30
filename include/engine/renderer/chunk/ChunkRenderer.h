@@ -6,6 +6,7 @@
 #include "engine/renderer/block/FaceBakery.h"
 #include "engine/world/Chunk.h"
 #include "engine/mesh/Mesh.h"
+#include <chrono>
 
 class ChunkRenderer
 {
@@ -54,6 +55,7 @@ public:
 
 		auto mesh = std::make_unique<Mesh>();
 		mesh->setData(vertices, indices);
+
 		return mesh;
 	}
 };

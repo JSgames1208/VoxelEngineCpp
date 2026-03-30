@@ -1,0 +1,16 @@
+{
+    "grass_block_top": 10,
+    "grass_block_side": 9,
+    "dirt": 7,
+    "stone": 20,
+    "bedrock": 0,
+    "log_top": 14,
+    "log_side": 13,
+    "gravel": 4,
+    "ice": 19,
+    "sand": 16,
+    "obsidian": 5,
+    "snow_block": 12,
+    "cobblestone": 3,
+    "air": 21
+}
