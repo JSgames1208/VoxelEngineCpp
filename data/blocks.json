@@ -10,5 +10,6 @@
     "obsidian": [ "obsidian", "obsidian", "obsidian", "obsidian", "obsidian", "obsidian" ],
     "snow_block": [ "snow_block", "snow_block", "snow_block", "snow_block", "snow_block", "snow_block" ],
     "cobblestone": [ "cobblestone", "cobblestone", "cobblestone", "cobblestone", "cobblestone", "cobblestone" ],
+    "leaves": ["leaves", "leaves", "leaves", "leaves", "leaves", "leaves"],
     "air": [ "air", "air", "air", "air", "air", "air" ]
 }

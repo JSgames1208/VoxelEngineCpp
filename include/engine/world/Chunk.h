@@ -9,13 +9,15 @@ public:
 	static const int SIZEX = 16;
 	static const int SIZEY = 128;
 	static const int SIZEZ = 16;
-	Chunk(ChunkCoord _coord)
+	Chunk(ChunkCoord _coord, int _seed)
 		: coord(_coord)
+		, seed(_seed)
 	{
 	}
 
 	bool isDirty = true;
 	bool isQueued = false;
+
 
 	ChunkCoord coord;
 
@@ -30,5 +32,11 @@ public:
 	{
 		blocks[x][y][z] = value;
 	}
+
+	int getSeed()
+	{
+		return seed;
+	}
 private:
+	int seed;
 };

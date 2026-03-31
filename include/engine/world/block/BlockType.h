@@ -17,6 +17,7 @@ enum class BlockType
 	SNOW_BLOCK,
 	STONE,
 	GRAVEL,
+	LEAVES,
 	SAND,
 };
 

@@ -51,7 +51,13 @@ public:
 		return chunk->get(localX, worldY, localZ);
 	}
 
+	int getSeed()
+	{
+		return seed;
+	}
+
 	std::unordered_map<ChunkCoord, std::unique_ptr<Chunk>> chunks;
 private:
 	std::mutex chunkMutex;
+	int seed = 100;
 };

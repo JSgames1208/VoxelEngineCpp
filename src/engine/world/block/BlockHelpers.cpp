@@ -15,6 +15,7 @@ BlockType stringToBlockType(const std::string& name)
         {"obsidian", BlockType::OBSIDIAN},
         {"snow_block", BlockType::SNOW_BLOCK},
         {"cobblestone", BlockType::COBBLESTONE},
+        {"leaves", BlockType::LEAVES },
         {"air", BlockType::AIR }
     };
 

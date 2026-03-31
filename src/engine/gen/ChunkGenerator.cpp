@@ -23,6 +23,11 @@ void ChunkGenerator::start()
 	}
 }
 
+void ChunkGenerator::addDecorator(std::unique_ptr<IChunkDecorator> decorator)
+{
+	decorators.push_back(std::move(decorator));
+}
+
 void ChunkGenerator::stop()
 {
 	running = false;
@@ -75,7 +80,7 @@ std::unique_ptr<Chunk> ChunkGenerator::fetchGeneratedChunk()
 
 std::unique_ptr<Chunk> ChunkGenerator::generateChunk(const ChunkCoord& coord) 
 {
-	auto chunk = std::make_unique<Chunk>(coord);
+	auto chunk = std::make_unique<Chunk>(coord, world->getSeed());
 
 	for (int x = 0; x < Chunk::SIZEX; x++)
 	{
@@ -101,6 +106,12 @@ std::unique_ptr<Chunk> ChunkGenerator::generateChunk(const ChunkCoord& coord)
 				chunk->set(x, y, z, block);
 			}
 		}
+	}
+
+	std::lock_guard<std::mutex> lock(decoratorMutex);
+	for (auto& decorator : decorators)
+	{
+		decorator->decorate(*chunk, coord);
 	}
 
 	return chunk;
