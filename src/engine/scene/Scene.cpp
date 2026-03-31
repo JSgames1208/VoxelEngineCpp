@@ -1,6 +1,7 @@
 #include "engine/scene/Scene.h"
 #include "engine/world/World.h"
 #include "engine/gen/decorators/TreeDecorator.h"
+#include "engine/gen/decorators/RockClumpDecorator.h"
 
 Scene::Scene()
 {
@@ -22,6 +23,7 @@ Scene::Scene()
 	// 5. Chunk generator
 	generator = std::make_unique<ChunkGenerator>(world.get());
 	generator->addDecorator(std::make_unique<TreeDecorator>());
+	generator->addDecorator(std::make_unique<RockClumpDecorator>());
 
 	std::cout << "loaded generator and mesher" << std::endl;
 

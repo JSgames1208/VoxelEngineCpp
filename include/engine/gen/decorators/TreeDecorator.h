@@ -21,6 +21,8 @@ public:
                     }
     }
 private:
+
+    //CHATGPT, AS DEMO
     void spawnTree(Chunk& chunk, int x, int y, int z)
     {
         auto isValid = [](int val, int max) { return val >= 0 && val < max; };
