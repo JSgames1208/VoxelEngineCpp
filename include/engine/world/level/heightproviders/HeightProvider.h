@@ -8,5 +8,5 @@ class HeightProvider
 {
 public:
     HeightProvider() = default;
-    virtual int getHeight(int wx, int wz) { return 0; };
+    virtual int getHeight(int wx, int wz) const { return 0; };
 };

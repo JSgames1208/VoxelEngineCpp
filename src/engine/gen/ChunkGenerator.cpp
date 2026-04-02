@@ -1,4 +1,6 @@
 #include "engine/gen/ChunkGenerator.h"
+#include "engine/world/level/heightproviders/NoiseHeightProvider.h"
+#include "engine/world/level/heightproviders/ConstantHeight.h"
 
 ChunkGenerator::ChunkGenerator(Level* world)
 	: world(world)
@@ -6,7 +8,7 @@ ChunkGenerator::ChunkGenerator(Level* world)
 	noise.SetSeed(100);
 	noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
 	noise.SetFrequency(0.01f);
-	heightProvider = std::make_unique<NoiseHeightProvider>(noise);
+	heightProvider = std::make_unique<ConstantHeight>(64);
 }
 
 void ChunkGenerator::queueChunk(const ChunkCoord& coord)

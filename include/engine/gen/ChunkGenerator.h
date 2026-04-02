@@ -2,7 +2,7 @@
 #include "engine/core/ChunkCoord.h"
 #include "engine/world/Level.h"
 #include "engine/gen/decorators/IChunkDecorator.h"
-#include "engine/world/level/heightproviders/NoiseHeightProvider.h"
+#include "engine/world/level/heightproviders/HeightProvider.h"
 #include "FastNoiseLite.h"
 #include <thread>
 #include <atomic>
@@ -40,7 +40,7 @@ private:
 	std::queue<ChunkCoord> dirtyQueue;
 	std::unordered_map<ChunkCoord, bool> chunkDirtyMap;
 
-    std::unique_ptr<NoiseHeightProvider> heightProvider;
+    std::unique_ptr<HeightProvider> heightProvider;
 
 	void markChunkDirty(const ChunkCoord& coord);
 	

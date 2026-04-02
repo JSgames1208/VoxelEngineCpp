@@ -28,7 +28,7 @@ Scene::Scene()
 	std::cout << "loaded generator and mesher" << std::endl;
 
 	// 6. Queue chunks
-	int renderDistance = 25;
+	int renderDistance = 10;
 	totalChunksToGenerate = (2 * renderDistance + 1) * (2 * renderDistance + 1);
 	for (int r = 0; r <= renderDistance; r++)
 		for (int x = -r; x <= r; x++)
@@ -78,6 +78,11 @@ void Scene::update(float deltaTime)
 		markChunkDirty({ coord.x, coord.z + 1 });
 		markChunkDirty({ coord.x, coord.z - 1 });
 
+		markChunkDirty({ coord.x + 1, coord.z + 1 });
+		markChunkDirty({ coord.x - 1, coord.z + 1 });
+		markChunkDirty({ coord.x + 1, coord.z - 1 });
+		markChunkDirty({ coord.x - 1, coord.z - 1 });
+
 		while (!dirtyQueue.empty()) {
 			ChunkCoord dirtyCoord = dirtyQueue.front();
 			dirtyQueue.pop();
@@ -89,7 +94,7 @@ void Scene::update(float deltaTime)
 		}
 	}
 
-	int meshesPerFrame = 2;
+	int meshesPerFrame = 1;
 	for (int i = 0; i < meshesPerFrame && threadedMesher->hasFinishedMeshes(); ++i)
 	{
 		auto [coord, quads] = threadedMesher->fetchFinishedMesh();
@@ -111,8 +116,6 @@ void Scene::markChunkDirty(const ChunkCoord& coord)
 {
 	Chunk* chunk = world->getChunkPtr(coord);
 	if (!chunk) return;
-
-	if (chunk->isQueued) return;
 
 	chunk->isDirty = true;
 	chunk->isQueued = true;

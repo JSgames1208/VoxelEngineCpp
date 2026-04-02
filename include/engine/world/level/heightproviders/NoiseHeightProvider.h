@@ -9,15 +9,14 @@
 class NoiseHeightProvider : public HeightProvider
 {
 public:
-    NoiseHeightProvider(FastNoiseLite noise)
+    NoiseHeightProvider(const FastNoiseLite& noise)
         : noise(noise)
     {}
 
-    int getHeight(int wx, int wz) override
+    int getHeight(int wx, int wz) const override
     {
         return static_cast<int>(64 + noise.GetNoise(wx * 0.5f, wz * 0.5f) * 20);
     }
 private:
-    int value;
     FastNoiseLite noise;
 };
