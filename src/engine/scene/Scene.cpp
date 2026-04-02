@@ -1,11 +1,11 @@
 #include "engine/scene/Scene.h"
-#include "engine/world/World.h"
+#include "engine/world/Level.h"
 #include "engine/gen/decorators/TreeDecorator.h"
 #include "engine/gen/decorators/RockClumpDecorator.h"
 
 Scene::Scene()
 {
-	world = std::make_unique<World>();
+	world = std::make_unique<Level>();
 
 	// 2. Create the atlas
 	atlas = std::make_unique<TextureAtlas>();

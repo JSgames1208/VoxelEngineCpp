@@ -1,6 +1,6 @@
 #pragma once
 #include "engine/mesh/ChunkMesher.h"
-#include "engine/world/World.h"
+#include "engine/world/Level.h"
 #include "engine/mesh/Mesh.h"
 #include <mutex>
 #include <queue>
@@ -12,7 +12,7 @@
 class ThreadedChunkMesher
 {
 public:
-	ThreadedChunkMesher(World* world, ChunkMesher* mesher);
+	ThreadedChunkMesher(Level* world, ChunkMesher* mesher);
 	~ThreadedChunkMesher() = default;
 
 	void queueChunk(const ChunkCoord& coord);
@@ -24,7 +24,7 @@ public:
 
 	std::unique_ptr<Mesh> createMeshFromQuads(const std::vector<BakedQuad>& quads);
 private:
-	World* world;
+	Level* world;
 	ChunkMesher* mesher;
 
 	std::queue<ChunkCoord> meshingQueue;

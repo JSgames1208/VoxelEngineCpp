@@ -5,10 +5,10 @@
 #include "engine/world/Chunk.h"
 #include <mutex>
 
-class World
+class Level
 {
 public:
-	World() = default;
+	Level() = default;
 
 	void addChunk(ChunkCoord& coord, std::unique_ptr<Chunk> chunk)
 	{
@@ -21,7 +21,7 @@ public:
 		return *chunks.at(coord);
 	}
 
-	Chunk* World::getChunkPtr(ChunkCoord coord)
+	Chunk* Level::getChunkPtr(ChunkCoord coord)
 	{
 		std::lock_guard<std::mutex> lock(chunkMutex);
 		auto it = chunks.find(coord);

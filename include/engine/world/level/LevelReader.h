@@ -1,17 +1,17 @@
 #pragma once
 #include "engine/world/level/LevelSimulatedReader.h"
-#include "engine/world/World.h"
+#include "engine/world/Level.h"
 
 class LevelReader : public LevelSimulatedReader
 {
 public:
-	LevelReader(World* w): world(w) {}
+	LevelReader(Level* w): world(w) {}
 
 	BlockType getBlock(int wx, int wy, int wz) const override
 	{
-		Chunk chunk = world->getChunkPtr(wx / Chunk::SIZEX, wz / Chunk::SIZEZ);
+		Chunk* chunk = world->getChunkPtr(ChunkCoord(wx / Chunk::SIZEX, wz / Chunk::SIZEZ));
 		if (!chunk) return BlockType::AIR;
-		return chunk.get(wx % SIZEX, wy, wz % Chunk::SIZEZ)
+		return chunk->getAtWorldPos(wx, wy, wz);
 	}
 
 	bool isAir(int wx, int wy, int wz) const override
@@ -19,5 +19,5 @@ public:
 		return getBlock(wx, wy, wz) == BlockType::AIR;
 	}
 private:
-	World* world;
+    Level* world;
 };

@@ -1,11 +1,12 @@
 #include "engine/gen/ChunkGenerator.h"
 
-ChunkGenerator::ChunkGenerator(World* world)
+ChunkGenerator::ChunkGenerator(Level* world)
 	: world(world)
 {
 	noise.SetSeed(100);
 	noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
 	noise.SetFrequency(0.01f);
+	heightProvider = std::make_unique<NoiseHeightProvider>(noise);
 }
 
 void ChunkGenerator::queueChunk(const ChunkCoord& coord)
@@ -86,10 +87,10 @@ std::unique_ptr<Chunk> ChunkGenerator::generateChunk(const ChunkCoord& coord)
 	{
 		for (int z = 0; z < Chunk::SIZEZ; z++)
 		{
-			int worldX = coord.x * Chunk::SIZEX + x;
-			int worldZ = coord.z * Chunk::SIZEZ + z;
+			int wx = coord.x * Chunk::SIZEX + x;
+			int wz = coord.z * Chunk::SIZEZ + z;
 
-			int height = static_cast<int>(64 + noise.GetNoise(worldX * 0.5f, worldZ * 0.5f) * 20);
+			int height = heightProvider->getHeight(wx, wz);
 
 			for (int y = 0; y < Chunk::SIZEY; y++)
 			{

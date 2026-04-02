@@ -28,6 +28,11 @@ public:
 		return blocks[x][y][z];
 	}
 
+	BlockType getAtWorldPos(int wx, int wy, int wz) const
+	{
+		return blocks[wx % Chunk::SIZEX][wy][wz % Chunk::SIZEZ];
+	}
+
 	void set(int x, int y, int z, BlockType value)
 	{
 		blocks[x][y][z] = value;

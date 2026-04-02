@@ -4,7 +4,7 @@
 #include "engine/renderer/block/BakedQuad.h"
 #include "engine/renderer/block/FaceBakery.h"
 #include "engine/texture/TextureAtlas.h"
-#include "engine/world/World.h"
+#include "engine/world/Level.h"
 
 class ChunkMesher
 {
@@ -19,8 +19,8 @@ public:
         return 1.0f - occ * 0.25f;
     }
 
-	bool isSolidHybrid(const Chunk& chunk, const ChunkCoord& coord, World* world,
-                   int x, int y, int z)
+	bool isSolidHybrid(const Chunk& chunk, const ChunkCoord& coord, Level* world,
+                       int x, int y, int z)
 {
     if (y < 0 || y >= Chunk::SIZEY)
         return false;
@@ -54,7 +54,7 @@ public:
     return chunk.get(x, y, z) != BlockType::AIR;
 }
 
-	std::unique_ptr<std::vector<BakedQuad>> meshChunk(const Chunk& chunk, const ChunkCoord& coord, World* world)
+	std::unique_ptr<std::vector<BakedQuad>> meshChunk(const Chunk& chunk, const ChunkCoord& coord, Level* world)
 	{
 		std::vector<BakedQuad> quads;
 

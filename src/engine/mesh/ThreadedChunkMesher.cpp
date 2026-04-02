@@ -2,7 +2,7 @@
 #include <iostream>
 #include <chrono>
 
-ThreadedChunkMesher::ThreadedChunkMesher(World* world, ChunkMesher* mesher)
+ThreadedChunkMesher::ThreadedChunkMesher(Level* world, ChunkMesher* mesher)
 	: world(world)
 	, mesher(mesher)
 {

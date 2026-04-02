@@ -1,7 +1,8 @@
 #pragma once
 #include "engine/core/ChunkCoord.h"
-#include "engine/world/World.h"
+#include "engine/world/Level.h"
 #include "engine/gen/decorators/IChunkDecorator.h"
+#include "engine/world/level/heightproviders/NoiseHeightProvider.h"
 #include "FastNoiseLite.h"
 #include <thread>
 #include <atomic>
@@ -12,7 +13,7 @@
 class ChunkGenerator
 {
 public:
-	ChunkGenerator(World* world);
+	ChunkGenerator(Level* world);
 
 	void queueChunk(const ChunkCoord& coord);
 	void processChunks(int chunksPerFrame = 1);
@@ -27,7 +28,7 @@ public:
 	bool hasDirtyChunks();
 	ChunkCoord popDirtyChunk();
 private:
-	World* world;
+	Level* world;
 	FastNoiseLite noise;
 
 	std::queue<ChunkCoord> chunkQueue;
@@ -38,6 +39,8 @@ private:
 
 	std::queue<ChunkCoord> dirtyQueue;
 	std::unordered_map<ChunkCoord, bool> chunkDirtyMap;
+
+    std::unique_ptr<NoiseHeightProvider> heightProvider;
 
 	void markChunkDirty(const ChunkCoord& coord);
 	
