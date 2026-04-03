@@ -10,14 +10,17 @@ ThreadedChunkMesher::ThreadedChunkMesher(Level* world, ChunkMesher* mesher)
 
 void ThreadedChunkMesher::queueChunk(const ChunkCoord& coord)
 {
-	std::lock_guard<std::mutex> lock(queueMutex);
-	meshingQueue.push(coord);
+	{
+		std::lock_guard<std::mutex> lock(queueMutex);
+		meshingQueue.push(coord);
+	}
+	cv.notify_one();
 }
 
 void ThreadedChunkMesher::start(int threadCount)
 {
-	threadCount = std::min((unsigned int)threadCount, std::thread::hardware_concurrency());
 	running = true;
+	threadCount = std::min((unsigned int)threadCount, std::thread::hardware_concurrency());
 	for (int i = 0; i < threadCount; i++)
 	{
 		workers.emplace_back(std::thread(&ThreadedChunkMesher::workerLoop, this));
@@ -26,7 +29,11 @@ void ThreadedChunkMesher::start(int threadCount)
 
 void ThreadedChunkMesher::stop()
 {
-	running = false;
+	{
+		std::lock_guard<std::mutex> lock(queueMutex);
+		running = false;
+	}
+	cv.notify_all();
 	for (auto& t : workers)
 	{
 		if (t.joinable()) t.join();
@@ -103,12 +110,13 @@ void ThreadedChunkMesher::workerLoop()
 	while (running)
 	{
 		ChunkCoord coord;
-
 		{
-			std::lock_guard<std::mutex> lock(queueMutex);
-			if (meshingQueue.empty())
+			std::unique_lock<std::mutex> lock(queueMutex);
+			cv.wait(lock, [&]{ return !meshingQueue.empty() || !running; });
+
+			if (!running && meshingQueue.empty())
 			{
-				continue;
+				return;
 			}
 			coord = meshingQueue.front();
 			meshingQueue.pop();

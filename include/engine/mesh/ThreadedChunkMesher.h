@@ -29,6 +29,8 @@ private:
 	Level* world;
 	ChunkMesher* mesher;
 
+	std::condition_variable cv;
+
 	std::queue<ChunkCoord> meshingQueue;
 	std::mutex queueMutex;
 

@@ -13,29 +13,30 @@ public:
 		: coord(_coord)
 		, seed(_seed)
 	{
+		blocks.resize(SIZEX * SIZEY * SIZEZ);
 	}
 
 	bool isDirty = true;
 	bool isQueued = false;
 
-
 	ChunkCoord coord;
-
-	BlockType blocks[SIZEX][SIZEY][SIZEZ];
 
 	BlockType get(int x, int y, int z) const
 	{
-		return blocks[x][y][z];
+		return blocks[(x * SIZEY + y) * SIZEZ + z];
 	}
 
 	BlockType getAtWorldPos(int wx, int wy, int wz) const
 	{
-		return blocks[wx % Chunk::SIZEX][wy][wz % Chunk::SIZEZ];
+		int x = wx % Chunk::SIZEX;
+		int z = wz % Chunk::SIZEZ;
+
+		return this->get(x, wy, z);
 	}
 
 	void set(int x, int y, int z, BlockType value)
 	{
-		blocks[x][y][z] = value;
+		blocks[(x * SIZEY + y) * SIZEZ + z] = value;
 	}
 
 	int getSeed()
@@ -44,4 +45,5 @@ public:
 	}
 private:
 	int seed;
+	std::vector<BlockType> blocks;
 };

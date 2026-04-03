@@ -85,6 +85,11 @@ std::unique_ptr<Chunk> ChunkGenerator::generateChunk(const ChunkCoord& coord)
 {
 	auto chunk = std::make_unique<Chunk>(coord, world->getSeed());
 
+	std::vector<int> heights(Chunk::SIZEX * Chunk::SIZEZ);
+	for (int x = 0; x < Chunk::SIZEX; x++)
+		for (int z = 0; z < Chunk::SIZEZ; z++)
+			heights[x + z * Chunk::SIZEX] = heightProvider->getHeight(coord.x * Chunk::SIZEX + x, coord.z * Chunk::SIZEZ + z);
+
 	for (int x = 0; x < Chunk::SIZEX; x++)
 	{
 		for (int z = 0; z < Chunk::SIZEZ; z++)
@@ -92,7 +97,7 @@ std::unique_ptr<Chunk> ChunkGenerator::generateChunk(const ChunkCoord& coord)
 			int wx = coord.x * Chunk::SIZEX + x;
 			int wz = coord.z * Chunk::SIZEZ + z;
 
-			int height = heightProvider->getHeight(wx, wz);
+			int height = heights[x + z * Chunk::SIZEX];
 
 			for (int y = 0; y < Chunk::SIZEY; y++)
 			{

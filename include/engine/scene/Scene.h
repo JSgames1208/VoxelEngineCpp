@@ -59,6 +59,8 @@ private:
 	std::unique_ptr<TextureAtlas> atlas;
 	ChunkRenderer chunkRenderer;
 
+	std::queue<std::pair<ChunkCoord, std::unique_ptr<Mesh>>> gpuUploadQueue;
+
 	int totalChunksToGenerate = 0;
 	int generatedCount = 0;
 	bool timingStarted = false;

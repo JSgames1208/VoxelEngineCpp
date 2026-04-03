@@ -109,7 +109,7 @@ void Scene::update(float deltaTime)
 		if (!quads) continue;
 
 		auto mesh = threadedMesher->createMeshFromQuads(*quads);
-		updateChunkMesh(coord, std::move(mesh));
+		gpuUploadQueue.push({coord, std::move(mesh)});
 
 		Chunk* chunk = world->getChunkPtr(coord);
 		if (chunk)
@@ -119,6 +119,14 @@ void Scene::update(float deltaTime)
 		}
 	}
 
+	int maxUploadsPerFrame = 5;
+	for (int i = 0; i < maxUploadsPerFrame && !gpuUploadQueue.empty(); ++i)
+	{
+		auto [coord, mesh] = std::move(gpuUploadQueue.front());
+		gpuUploadQueue.pop();
+
+		chunkMeshes[coord] = std::make_unique<ChunkMesh>(std::move(mesh), coord);
+	}
 
 	if (!threadedMesher->hasFinishedMeshes() && meshTimingStarted)
 	{
@@ -126,7 +134,6 @@ void Scene::update(float deltaTime)
 		double totalMs = std::chrono::duration<double, std::milli>(endTime - meshStartTime).count();
 		std::cout << "Total meshing time so far: " << totalMs << " ms" << std::endl;
 	}
-
 }
 
 void Scene::markChunkDirty(const ChunkCoord& coord)
