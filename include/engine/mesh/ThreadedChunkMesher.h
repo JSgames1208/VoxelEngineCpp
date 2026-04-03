@@ -2,18 +2,13 @@
 #include "engine/mesh/ChunkMesher.h"
 #include "engine/world/Level.h"
 #include "engine/mesh/Mesh.h"
+#include "engine/mesh/MeshData.h"
 #include <mutex>
 #include <queue>
 #include <memory>
 #include <thread>
 #include <vector>
 #include <atomic>
-
-struct MeshData
-{
-    std::vector<float> vertices;
-    std::vector<unsigned int> indices;
-};
 
 class ThreadedChunkMesher
 {
@@ -22,7 +17,7 @@ public:
 	~ThreadedChunkMesher() = default;
 
 	void queueChunk(const ChunkCoord& coord);
-	void start(int numThreads = 4);
+	void start(int numThreads = 8);
 	void stop();
 
 	bool hasFullNeighborhood(Level* world, const ChunkCoord& coord);

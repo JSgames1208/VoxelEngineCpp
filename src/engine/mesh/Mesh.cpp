@@ -43,29 +43,29 @@ Mesh::~Mesh()
 	glDeleteVertexArrays(1, &VAO);
 }
 
-void Mesh::setData(const std::vector<float>& vertices, const std::vector<unsigned int>& indices) {
-	indexCount = indices.size();
+void Mesh::setData(std::unique_ptr<MeshData> meshData) {
+	indexCount = meshData->indices.size();
 
 	// VBO
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	if (vertices.size() > maxVertices) {
-		maxVertices = vertices.size();
-		glBufferData(GL_ARRAY_BUFFER, maxVertices * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+	if (meshData->vertices.size() > maxVertices) {
+		maxVertices = meshData->vertices.size();
+		glBufferData(GL_ARRAY_BUFFER, meshData->vertices.size() * sizeof(float), meshData->vertices.data(), GL_STATIC_DRAW);
 	} else
 	{
-		glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(float), vertices.data());
+		glBufferSubData(GL_ARRAY_BUFFER, 0, meshData->vertices.size() * sizeof(float), meshData->vertices.data());
 	}
 
 	// EBO
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	if (indices.size() > maxIndices)
+	if (meshData->indices.size() > maxIndices)
 	{
-		maxIndices = indices.size();
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+		maxIndices = meshData->indices.size();
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshData->indices.size() * sizeof(unsigned int), meshData->indices.data(), GL_STATIC_DRAW);
 	}
 	else
 	{
-		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indices.size() * sizeof(unsigned int), indices.data());
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, meshData->indices.size() * sizeof(unsigned int), meshData->indices.data());
 	}
 }
 

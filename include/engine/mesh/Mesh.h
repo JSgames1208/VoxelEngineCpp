@@ -1,6 +1,9 @@
 #pragma once
 #include <vector>
+#include <memory>
 #include "glad/glad.h"
+#include "engine/mesh/ThreadedMeshCreator.h"
+#include "engine/mesh/ThreadedChunkMesher.h"
 
 class Mesh
 {
@@ -11,7 +14,7 @@ public:
 
 	size_t indexCount;
 
-	void setData(const std::vector<float>& vertices, const std::vector<unsigned int>& indices);
+	void setData(std::unique_ptr<MeshData> meshData);
 	void draw();
 private:
 	GLuint VAO;

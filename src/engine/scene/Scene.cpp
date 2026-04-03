@@ -29,7 +29,7 @@ Scene::Scene()
 	std::cout << "loaded generator and mesher" << std::endl;
 
 	// 6. Queue chunks
-	int renderDistance = 25;
+	int renderDistance = 30;
 	totalChunksToGenerate = (2 * renderDistance + 1) * (2 * renderDistance + 1);
 	for (int r = 0; r <= renderDistance; r++)
 		for (int x = -r; x <= r; x++)
@@ -99,7 +99,7 @@ void Scene::update(float deltaTime)
         }
 	}
 
-	int meshesPerFrame = 100;
+	int meshesPerFrame = 1000;
 	for (int i = 0; i < meshesPerFrame && threadedMesher->hasFinishedMeshes(); ++i)
 	{
 		auto [coord, quads] = threadedMesher->fetchFinishedMesh();
@@ -109,14 +109,15 @@ void Scene::update(float deltaTime)
 	}
 
 	meshCreator->mergeThreadLocalFinished();
-	int meshCreationsPerFrame = 100;
+	int meshCreationsPerFrame = 1000;
 	for (int i = 0; i < meshCreationsPerFrame && meshCreator->hasFinishedMeshes(); ++i)
 	{
 		auto [coord, meshData] = meshCreator->fetchFinishedMesh();
 		if (!meshData) continue;
 
         auto mesh = std::make_unique<Mesh>();
-        mesh->setData(meshData->vertices, meshData->indices);
+
+		mesh->setData(std::move(meshData));
 
 		gpuUploadQueue.push({coord, std::move(mesh)});
 
@@ -128,7 +129,7 @@ void Scene::update(float deltaTime)
 		}
 	}
 
-	int maxUploadsPerFrame = 100;
+	int maxUploadsPerFrame = 1000;
 	for (int i = 0; i < maxUploadsPerFrame && !gpuUploadQueue.empty(); ++i)
 	{
 		auto t1 = std::chrono::high_resolution_clock::now();
@@ -142,15 +143,14 @@ void Scene::update(float deltaTime)
 		//std::cout << "uploading took: " << std::chrono::duration<double, std::milli>(t2 - t1).count() << " ms" << std::endl;
 	}
 
-
+	/*
 	if (!threadedMesher->hasFinishedMeshes() && meshTimingStarted)
 	{
 		auto endTime = std::chrono::high_resolution_clock::now();
 		double totalMs = std::chrono::duration<double, std::milli>(endTime - meshStartTime).count();
 		std::cout << "Total meshing time so far: " << totalMs << " ms" << std::endl;
 	}
-
-
+	*/
 }
 
 void Scene::markChunkDirty(const ChunkCoord& coord)

@@ -3,6 +3,7 @@
 //
 
 #include "engine/mesh/ThreadedMeshCreator.h"
+#include "engine/mesh/ThreadedChunkMesher.h"
 #include <vector>
 #include <memory>
 

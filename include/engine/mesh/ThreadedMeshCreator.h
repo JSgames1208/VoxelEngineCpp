@@ -5,12 +5,14 @@
 #pragma once
 #include "engine/renderer/chunk/ChunkRenderer.h"
 #include "engine/renderer/block/BakedQuad.h"
-#include "engine/mesh/ThreadedChunkMesher.h"
+#include "engine/mesh/MeshData.h"
 #include "engine/core/ChunkCoord.h"
 #include "engine/mesh/Mesh.h"
 #include <mutex>
 #include <memory>
 #include <queue>
+
+class ThreadedChunkMesher;
 
 class ThreadedMeshCreator
 {
