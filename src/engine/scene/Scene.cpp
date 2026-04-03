@@ -19,6 +19,7 @@ Scene::Scene()
 
 	// 4. Threaded mesher gets a pointer to mesher (safe)
 	threadedMesher = std::make_unique<ThreadedChunkMesher>(world.get(), mesher.get());
+    meshCreator = std::make_unique<ThreadedMeshCreator>(threadedMesher.get());
 
 	// 5. Chunk generator
 	generator = std::make_unique<ChunkGenerator>(world.get());
@@ -39,15 +40,18 @@ Scene::Scene()
 	// 7. Start timing and generation
 	startTime = std::chrono::high_resolution_clock::now();
 	timingStarted = true;
+
+    meshCreator->start();
+	threadedMesher->start();
 	generator->start();
 
-	threadedMesher->start();
 }
 
 Scene::~Scene()
 {
 	generator->stop();
 	threadedMesher->stop();
+    meshCreator->stop();
 }
 
 void Scene::update(float deltaTime)
@@ -95,16 +99,24 @@ void Scene::update(float deltaTime)
         }
 	}
 
-	int meshesPerFrame = 3;
+	int meshesPerFrame = 100;
 	for (int i = 0; i < meshesPerFrame && threadedMesher->hasFinishedMeshes(); ++i)
 	{
 		auto [coord, quads] = threadedMesher->fetchFinishedMesh();
 		if (!quads) continue;
 
-		auto t1 = std::chrono::high_resolution_clock::now();
-		auto mesh = threadedMesher->createMeshFromQuads(*quads);
-		auto t2 = std::chrono::high_resolution_clock::now();
-		//std::cout << "mesh from quads took: " << std::chrono::duration<double, std::milli>(t2 - t1).count() << " ms" << std::endl;
+		meshCreator->queueQuads(coord, std::move(quads));
+	}
+
+	meshCreator->mergeThreadLocalFinished();
+	int meshCreationsPerFrame = 100;
+	for (int i = 0; i < meshCreationsPerFrame && meshCreator->hasFinishedMeshes(); ++i)
+	{
+		auto [coord, meshData] = meshCreator->fetchFinishedMesh();
+		if (!meshData) continue;
+
+        auto mesh = std::make_unique<Mesh>();
+        mesh->setData(meshData->vertices, meshData->indices);
 
 		gpuUploadQueue.push({coord, std::move(mesh)});
 
@@ -130,14 +142,15 @@ void Scene::update(float deltaTime)
 		//std::cout << "uploading took: " << std::chrono::duration<double, std::milli>(t2 - t1).count() << " ms" << std::endl;
 	}
 
-	/*
+
 	if (!threadedMesher->hasFinishedMeshes() && meshTimingStarted)
 	{
 		auto endTime = std::chrono::high_resolution_clock::now();
 		double totalMs = std::chrono::duration<double, std::milli>(endTime - meshStartTime).count();
 		std::cout << "Total meshing time so far: " << totalMs << " ms" << std::endl;
 	}
-	*/
+
+
 }
 
 void Scene::markChunkDirty(const ChunkCoord& coord)

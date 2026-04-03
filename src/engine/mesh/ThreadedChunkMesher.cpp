@@ -53,11 +53,18 @@ bool ThreadedChunkMesher::hasFullNeighborhood(Level *world, const ChunkCoord &co
 	return true;
 }
 
-std::unique_ptr<Mesh> ThreadedChunkMesher::createMeshFromQuads(const std::vector<BakedQuad>& quads)
+std::unique_ptr<MeshData> ThreadedChunkMesher::createMeshFromQuads(const std::vector<BakedQuad>& quads)
 {
-	std::vector<float> vertices;
-	std::vector<unsigned int> indices;
+    auto meshData = std::make_unique<MeshData>();
+	auto& vertices = meshData->vertices;
+	auto& indices = meshData->indices;
 
+	size_t quadCount = quads.size();
+	vertices.resize(quadCount * 4 * 9);
+	indices.resize(quadCount * 6);
+
+	float* vPtr = vertices.data();
+	uint32_t* iPtr = indices.data();
 	unsigned int indexOffset = 0;
 
 	for (const auto& quad : quads)
@@ -68,41 +75,32 @@ std::unique_ptr<Mesh> ThreadedChunkMesher::createMeshFromQuads(const std::vector
 			auto uv = quad.getUV(i);
 			auto ao = quad.getAO(i);
 
-			vertices.push_back(pos.x);
-			vertices.push_back(pos.y);
-			vertices.push_back(pos.z);
+			*vPtr++ = pos.x;
+			*vPtr++ = pos.y;
+			*vPtr++ = pos.z;
 
-			vertices.push_back(Directions::get(quad.direction).vector.x);
-			vertices.push_back(Directions::get(quad.direction).vector.y);
-			vertices.push_back(Directions::get(quad.direction).vector.z);
+			*vPtr++ = Directions::get(quad.direction).vector.x;
+			*vPtr++ = Directions::get(quad.direction).vector.y;
+			*vPtr++ = Directions::get(quad.direction).vector.z;
 
-			vertices.push_back(uv.x);
-			vertices.push_back(uv.y);
+			*vPtr++ = uv.x;
+			*vPtr++ = uv.y;
 
-			vertices.push_back(ao);
+			*vPtr++ = ao;
 		}
 
-		indices.push_back(indexOffset);
-		indices.push_back(indexOffset + 2);
-		indices.push_back(indexOffset + 1);
+		*iPtr++ = indexOffset;
+		*iPtr++ = indexOffset + 2;
+		*iPtr++ = indexOffset + 1;
 
-		indices.push_back(indexOffset);
-		indices.push_back(indexOffset + 3);
-		indices.push_back(indexOffset + 2);
+		*iPtr++ = indexOffset;
+		*iPtr++ = indexOffset + 3;
+		*iPtr++ = indexOffset + 2;
 
 		indexOffset += 4;
 	}
 
-	auto mesh = std::make_unique<Mesh>();
-
-	auto start = std::chrono::high_resolution_clock::now();
-
-	mesh->setData(vertices, indices);
-
-	auto end = std::chrono::high_resolution_clock::now();
-	double ms = std::chrono::duration<double, std::milli>(end - start).count();
-
-	return mesh;
+	return meshData;
 }
 
 void ThreadedChunkMesher::workerLoop()

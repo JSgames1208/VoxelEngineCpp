@@ -9,6 +9,12 @@
 #include <vector>
 #include <atomic>
 
+struct MeshData
+{
+    std::vector<float> vertices;
+    std::vector<unsigned int> indices;
+};
+
 class ThreadedChunkMesher
 {
 public:
@@ -16,7 +22,7 @@ public:
 	~ThreadedChunkMesher() = default;
 
 	void queueChunk(const ChunkCoord& coord);
-	void start(int numThreads = 8);
+	void start(int numThreads = 4);
 	void stop();
 
 	bool hasFullNeighborhood(Level* world, const ChunkCoord& coord);
@@ -24,7 +30,7 @@ public:
 	bool hasFinishedMeshes();
 	std::pair<ChunkCoord, std::unique_ptr<std::vector<BakedQuad>>> fetchFinishedMesh();
 
-	std::unique_ptr<Mesh> createMeshFromQuads(const std::vector<BakedQuad>& quads);
+	std::unique_ptr<MeshData> createMeshFromQuads(const std::vector<BakedQuad>& quads);
 private:
 	Level* world;
 	ChunkMesher* mesher;

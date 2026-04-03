@@ -9,6 +9,7 @@
 #include "engine/world/Chunk.h"
 #include "engine/mesh/ChunkMesher.h"
 #include "engine/renderer/chunk/ChunkRenderer.h"
+#include "engine/mesh/ThreadedMeshCreator.h"
 #include "engine/mesh/Mesh.h"
 #include "engine/world/Level.h"
 #include "engine/core/ChunkCoord.h"
@@ -55,6 +56,7 @@ private:
 	std::unique_ptr<Level> world;
 	std::unique_ptr<ChunkGenerator> generator;
 	std::unique_ptr<ThreadedChunkMesher> threadedMesher;
+	std::unique_ptr<ThreadedMeshCreator> meshCreator;
 	std::queue<ChunkCoord> dirtyQueue;
 	std::unique_ptr<TextureAtlas> atlas;
 	ChunkRenderer chunkRenderer;
