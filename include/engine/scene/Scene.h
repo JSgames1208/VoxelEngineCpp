@@ -63,5 +63,8 @@ private:
 	int generatedCount = 0;
 	bool timingStarted = false;
 
+	bool meshTimingStarted = false;
+
 	std::chrono::high_resolution_clock::time_point startTime;
+	std::chrono::high_resolution_clock::time_point meshStartTime;
 };

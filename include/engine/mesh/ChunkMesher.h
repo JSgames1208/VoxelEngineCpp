@@ -5,6 +5,36 @@
 #include "engine/renderer/block/FaceBakery.h"
 #include "engine/texture/TextureAtlas.h"
 #include "engine/world/Level.h"
+/*
+inline bool isSolid(const Chunk& chunk, const ChunkCoord& coord, Level* world,
+                    int x, int y, int z)
+{
+    if (y < 0) return false;
+    if (y >= Chunk::SIZEY)
+        return true;
+
+    if (x >= 0 && x < Chunk::SIZEX &&
+        z >= 0 && z < Chunk::SIZEZ)
+    {
+        return chunk.get(x, y, z) != BlockType::AIR;
+    }
+
+    // Only edges reach here
+    int cx = coord.x;
+    int cz = coord.z;
+
+    if (x < 0) { cx--; x += Chunk::SIZEX; }
+    else if (x >= Chunk::SIZEX) { cx++; x -= Chunk::SIZEX; }
+
+    if (z < 0) { cz--; z += Chunk::SIZEZ; }
+    else if (z >= Chunk::SIZEZ) { cz++; z -= Chunk::SIZEZ; }
+
+    Chunk* target = world->getChunkPtr({cx, cz});
+    if (!target) return false; // <--- key change
+
+    return target->get(x, y, z) != BlockType::AIR;
+}
+*/
 
 class ChunkMesher
 {
@@ -19,44 +49,41 @@ public:
         return 1.0f - occ * 0.25f;
     }
 
-	bool isSolidHybrid(const Chunk& chunk, const ChunkCoord& coord, Level* world,
-                       int x, int y, int z)
-{
-    if (y < 0 || y >= Chunk::SIZEY)
-        return false;
-
-    if (x < 0)
-    {
-        Chunk* neighbor = world->getChunkPtr({coord.x - 1, coord.z});
-        if (!neighbor) return false;
-        return neighbor->get(Chunk::SIZEX - 1, y, z) != BlockType::AIR;
-    }
-    else if (x >= Chunk::SIZEX)
-    {
-        Chunk* neighbor = world->getChunkPtr({coord.x + 1, coord.z});
-        if (!neighbor) return false;
-        return neighbor->get(0, y, z) != BlockType::AIR;
-    }
-
-    if (z < 0)
-    {
-        Chunk* neighbor = world->getChunkPtr({coord.x, coord.z - 1});
-        if (!neighbor) return false;
-        return neighbor->get(x, y, Chunk::SIZEZ - 1) != BlockType::AIR;
-    }
-    else if (z >= Chunk::SIZEZ)
-    {
-        Chunk* neighbor = world->getChunkPtr({coord.x, coord.z + 1});
-        if (!neighbor) return false;
-        return neighbor->get(x, y, 0) != BlockType::AIR;
-    }
-
-    return chunk.get(x, y, z) != BlockType::AIR;
-}
-
 	std::unique_ptr<std::vector<BakedQuad>> meshChunk(const Chunk& chunk, const ChunkCoord& coord, Level* world)
 	{
 		std::vector<BakedQuad> quads;
+
+        Chunk* neighbors[3][3] = {};
+        for (int dx = -1; dx <= 1; dx++)
+        {
+            for (int dz = -1; dz <= 1; dz++)
+            {
+                neighbors[dx+1][dz+1] = world->getChunkPtr({coord.x + dx, coord.z + dz});
+            }
+        }
+
+        auto getBlock = [&](int x, int y, int z) -> BlockType
+        {
+            if (y < 0) return BlockType::BEDROCK;
+            if (y >= Chunk::SIZEY) return BlockType::AIR;
+
+            int cx = 1, cz = 1;
+            if (x < 0) { cx--; x += Chunk::SIZEX; }
+            else if (x >= Chunk::SIZEX) { cx++; x -= Chunk::SIZEX; }
+
+            if (z < 0) { cz--; z += Chunk::SIZEZ; }
+            else if (z >= Chunk::SIZEZ) { cz++; z -= Chunk::SIZEZ; }
+
+            Chunk* target = neighbors[cx][cz];
+            if (!target) return BlockType::AIR;
+
+            return target->get(x, y, z);
+        };
+
+        auto isSolid = [&](int x, int y, int z) -> bool
+        {
+            return getBlock(x, y, z) != BlockType::AIR;
+        };
 
         for (int x = 0; x < Chunk::SIZEX; x++)
         {
@@ -76,18 +103,18 @@ public:
                     vec3 max(x + 1, y + 1, z + 1);
 
                     // UP (+Y)
-                    if (!isSolidHybrid(chunk, coord, world, x, y + 1, z))
+                    if (!isSolid(x, y + 1, z))
                     {
                         // Only check blocks above this face
-                        bool n = isSolidHybrid(chunk, coord, world, x, y + 1, z - 1);
-                        bool s = isSolidHybrid(chunk, coord, world, x, y + 1, z + 1);
-                        bool w = isSolidHybrid(chunk, coord, world, x - 1, y + 1, z);
-                        bool e = isSolidHybrid(chunk, coord, world, x + 1, y + 1, z);
+                        bool n = isSolid(x, y + 1, z - 1);
+                        bool s = isSolid(x, y + 1, z + 1);
+                        bool w = isSolid(x - 1, y + 1, z);
+                        bool e = isSolid(x + 1, y + 1, z);
 
-                        bool nw = isSolidHybrid(chunk, coord, world, x - 1, y + 1, z - 1);
-                        bool ne = isSolidHybrid(chunk, coord, world, x + 1, y + 1, z - 1);
-                        bool sw = isSolidHybrid(chunk, coord, world, x - 1, y + 1, z + 1);
-                        bool se = isSolidHybrid(chunk, coord, world, x + 1, y + 1, z + 1);
+                        bool nw = isSolid(x - 1, y + 1, z - 1);
+                        bool ne = isSolid(x + 1, y + 1, z - 1);
+                        bool sw = isSolid(x - 1, y + 1, z + 1);
+                        bool se = isSolid(x + 1, y + 1, z + 1);
 
                         float ao[4];
                         ao[0] = getAO(w, n, nw);
@@ -99,18 +126,18 @@ public:
                     }
 
                     // DOWN (-Y)
-                    if (!isSolidHybrid(chunk, coord, world, x, y - 1, z))
+                    if (!isSolid(x, y - 1, z))
                     {
                         // Only check blocks below
-                        bool n = isSolidHybrid(chunk, coord, world, x, y - 1, z - 1);
-                        bool s = isSolidHybrid(chunk, coord, world, x, y - 1, z + 1);
-                        bool w = isSolidHybrid(chunk, coord, world, x - 1, y - 1, z);
-                        bool e = isSolidHybrid(chunk, coord, world, x + 1, y - 1, z);
+                        bool n = isSolid(x, y - 1, z - 1);
+                        bool s = isSolid(x, y - 1, z + 1);
+                        bool w = isSolid(x - 1, y - 1, z);
+                        bool e = isSolid(x + 1, y - 1, z);
 
-                        bool nw = isSolidHybrid(chunk, coord, world, x - 1, y - 1, z - 1);
-                        bool ne = isSolidHybrid(chunk, coord, world, x + 1, y - 1, z - 1);
-                        bool sw = isSolidHybrid(chunk, coord, world, x - 1, y - 1, z + 1);
-                        bool se = isSolidHybrid(chunk, coord, world, x + 1, y - 1, z + 1);
+                        bool nw = isSolid(x - 1, y - 1, z - 1);
+                        bool ne = isSolid(x + 1, y - 1, z - 1);
+                        bool sw = isSolid(x - 1, y - 1, z + 1);
+                        bool se = isSolid(x + 1, y - 1, z + 1);
 
                         float ao[4];
                         ao[0] = getAO(w, s, sw);
@@ -122,18 +149,18 @@ public:
                     }
 
                     // NORTH (-Z)
-                    if (!isSolidHybrid(chunk, coord, world, x, y, z - 1))
+                    if (!isSolid(x, y, z - 1))
                     {
                         // Only check neighbors in -Z direction
-                        bool u = isSolidHybrid(chunk, coord, world, x, y + 1, z - 1);
-                        bool d = isSolidHybrid(chunk, coord, world, x, y - 1, z - 1);
-                        bool w = isSolidHybrid(chunk, coord, world, x - 1, y, z - 1);
-                        bool e = isSolidHybrid(chunk, coord, world, x + 1, y, z - 1);
+                        bool u = isSolid(x, y + 1, z - 1);
+                        bool d = isSolid(x, y - 1, z - 1);
+                        bool w = isSolid(x - 1, y, z - 1);
+                        bool e = isSolid(x + 1, y, z - 1);
 
-                        bool uw = isSolidHybrid(chunk, coord, world, x - 1, y + 1, z - 1);
-                        bool ue = isSolidHybrid(chunk, coord, world, x + 1, y + 1, z - 1);
-                        bool dw = isSolidHybrid(chunk, coord, world, x - 1, y - 1, z - 1);
-                        bool de = isSolidHybrid(chunk, coord, world, x + 1, y - 1, z - 1);
+                        bool uw = isSolid(x - 1, y + 1, z - 1);
+                        bool ue = isSolid(x + 1, y + 1, z - 1);
+                        bool dw = isSolid(x - 1, y - 1, z - 1);
+                        bool de = isSolid(x + 1, y - 1, z - 1);
 
                         float ao[4];
                         ao[0] = getAO(w, d, dw);
@@ -145,17 +172,17 @@ public:
                     }
 
                     // SOUTH (+Z)
-                    if (!isSolidHybrid(chunk, coord, world, x, y, z + 1))
+                    if (!isSolid(x, y, z + 1))
                     {
-                        bool u = isSolidHybrid(chunk, coord, world, x, y + 1, z + 1);
-                        bool d = isSolidHybrid(chunk, coord, world, x, y - 1, z + 1);
-                        bool w = isSolidHybrid(chunk, coord, world, x - 1, y, z + 1);
-                        bool e = isSolidHybrid(chunk, coord, world, x + 1, y, z + 1);
+                        bool u = isSolid(x, y + 1, z + 1);
+                        bool d = isSolid(x, y - 1, z + 1);
+                        bool w = isSolid(x - 1, y, z + 1);
+                        bool e = isSolid(x + 1, y, z + 1);
 
-                        bool uw = isSolidHybrid(chunk, coord, world, x - 1, y + 1, z + 1);
-                        bool ue = isSolidHybrid(chunk, coord, world, x + 1, y + 1, z + 1);
-                        bool dw = isSolidHybrid(chunk, coord, world, x - 1, y - 1, z + 1);
-                        bool de = isSolidHybrid(chunk, coord, world, x + 1, y - 1, z + 1);
+                        bool uw = isSolid(x - 1, y + 1, z + 1);
+                        bool ue = isSolid(x + 1, y + 1, z + 1);
+                        bool dw = isSolid(x - 1, y - 1, z + 1);
+                        bool de = isSolid(x + 1, y - 1, z + 1);
 
                         float ao[4];
                         ao[0] = getAO(e, d, de);
@@ -167,17 +194,17 @@ public:
                     }
 
                     // WEST (-X)
-                    if (!isSolidHybrid(chunk, coord, world, x - 1, y, z))
+                    if (!isSolid(x - 1, y, z))
                     {
-                        bool u = isSolidHybrid(chunk, coord, world, x - 1, y + 1, z);
-                        bool d = isSolidHybrid(chunk, coord, world, x - 1, y - 1, z);
-                        bool n = isSolidHybrid(chunk, coord, world, x - 1, y, z - 1);
-                        bool s = isSolidHybrid(chunk, coord, world, x - 1, y, z + 1);
+                        bool u = isSolid(x - 1, y + 1, z);
+                        bool d = isSolid(x - 1, y - 1, z);
+                        bool n = isSolid(x - 1, y, z - 1);
+                        bool s = isSolid(x - 1, y, z + 1);
 
-                        bool un = isSolidHybrid(chunk, coord, world, x - 1, y + 1, z - 1);
-                        bool us = isSolidHybrid(chunk, coord, world, x - 1, y + 1, z + 1);
-                        bool dn = isSolidHybrid(chunk, coord, world, x - 1, y - 1, z - 1);
-                        bool ds = isSolidHybrid(chunk, coord, world, x - 1, y - 1, z + 1);
+                        bool un = isSolid(x - 1, y + 1, z - 1);
+                        bool us = isSolid(x - 1, y + 1, z + 1);
+                        bool dn = isSolid(x - 1, y - 1, z - 1);
+                        bool ds = isSolid(x - 1, y - 1, z + 1);
 
                         float ao[4];
                         ao[0] = getAO(s, d, ds);
@@ -189,17 +216,17 @@ public:
                     }
 
                     // EAST (+X)
-                    if (!isSolidHybrid(chunk, coord, world, x + 1, y, z))
+                    if (!isSolid(x + 1, y, z))
                     {
-                        bool u = isSolidHybrid(chunk, coord, world, x + 1, y + 1, z);
-                        bool d = isSolidHybrid(chunk, coord, world, x + 1, y - 1, z);
-                        bool n = isSolidHybrid(chunk, coord, world, x + 1, y, z - 1);
-                        bool s = isSolidHybrid(chunk, coord, world, x + 1, y, z + 1);
+                        bool u = isSolid(x + 1, y + 1, z);
+                        bool d = isSolid(x + 1, y - 1, z);
+                        bool n = isSolid(x + 1, y, z - 1);
+                        bool s = isSolid(x + 1, y, z + 1);
 
-                        bool un = isSolidHybrid(chunk, coord, world, x + 1, y + 1, z - 1);
-                        bool us = isSolidHybrid(chunk, coord, world, x + 1, y + 1, z + 1);
-                        bool dn = isSolidHybrid(chunk, coord, world, x + 1, y - 1, z - 1);
-                        bool ds = isSolidHybrid(chunk, coord, world, x + 1, y - 1, z + 1);
+                        bool un = isSolid(x + 1, y + 1, z - 1);
+                        bool us = isSolid(x + 1, y + 1, z + 1);
+                        bool dn = isSolid(x + 1, y - 1, z - 1);
+                        bool ds = isSolid(x + 1, y - 1, z + 1);
 
                         float ao[4];
                         ao[0] = getAO(n, d, dn);

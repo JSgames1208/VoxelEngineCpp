@@ -8,7 +8,7 @@ ChunkGenerator::ChunkGenerator(Level* world)
 	noise.SetSeed(100);
 	noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
 	noise.SetFrequency(0.01f);
-	heightProvider = std::make_unique<ConstantHeight>(64);
+	heightProvider = std::make_unique<NoiseHeightProvider>(noise);
 }
 
 void ChunkGenerator::queueChunk(const ChunkCoord& coord)

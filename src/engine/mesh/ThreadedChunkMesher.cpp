@@ -33,6 +33,19 @@ void ThreadedChunkMesher::stop()
 	}
 }
 
+bool ThreadedChunkMesher::hasFullNeighborhood(Level *world, const ChunkCoord &coord)
+{
+	for (int dx = -1; dx <= 1; dx++)
+	{
+		for (int dz = -1; dz <= 1; dz++)
+		{
+			if (!world->getChunkPtr({coord.x + dx, coord.z + dz}))
+				return false;
+		}
+	}
+	return true;
+}
+
 std::unique_ptr<Mesh> ThreadedChunkMesher::createMeshFromQuads(const std::vector<BakedQuad>& quads)
 {
 	std::vector<float> vertices;

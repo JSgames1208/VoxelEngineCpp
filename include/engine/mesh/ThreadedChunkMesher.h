@@ -16,8 +16,10 @@ public:
 	~ThreadedChunkMesher() = default;
 
 	void queueChunk(const ChunkCoord& coord);
-	void start(int numThreads = 4);
+	void start(int numThreads = 8);
 	void stop();
+
+	bool hasFullNeighborhood(Level* world, const ChunkCoord& coord);
 
 	bool hasFinishedMeshes();
 	std::pair<ChunkCoord, std::unique_ptr<std::vector<BakedQuad>>> fetchFinishedMesh();

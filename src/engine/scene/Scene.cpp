@@ -28,7 +28,7 @@ Scene::Scene()
 	std::cout << "loaded generator and mesher" << std::endl;
 
 	// 6. Queue chunks
-	int renderDistance = 10;
+	int renderDistance = 15;
 	totalChunksToGenerate = (2 * renderDistance + 1) * (2 * renderDistance + 1);
 	for (int r = 0; r <= renderDistance; r++)
 		for (int x = -r; x <= r; x++)
@@ -78,23 +78,31 @@ void Scene::update(float deltaTime)
 		markChunkDirty({ coord.x, coord.z + 1 });
 		markChunkDirty({ coord.x, coord.z - 1 });
 
+		/*
 		markChunkDirty({ coord.x + 1, coord.z + 1 });
 		markChunkDirty({ coord.x - 1, coord.z + 1 });
 		markChunkDirty({ coord.x + 1, coord.z - 1 });
 		markChunkDirty({ coord.x - 1, coord.z - 1 });
+		*/
 
-		while (!dirtyQueue.empty()) {
-			ChunkCoord dirtyCoord = dirtyQueue.front();
-			dirtyQueue.pop();
+		if (!meshTimingStarted)
+		{
+			meshStartTime = std::chrono::high_resolution_clock ::now();
+			meshTimingStarted = true;
+		}
 
-			Chunk* dirtyChunk = world->getChunkPtr(dirtyCoord);
-			if (!dirtyChunk) continue;
+        while (!dirtyQueue.empty()) {
+            ChunkCoord dirtyCoord = dirtyQueue.front();
+            dirtyQueue.pop();
+
+            Chunk* dirtyChunk = world->getChunkPtr(dirtyCoord);
+            if (!dirtyChunk) continue;
 
 			threadedMesher->queueChunk(dirtyCoord);
-		}
+        }
 	}
 
-	int meshesPerFrame = 1;
+	int meshesPerFrame = 3;
 	for (int i = 0; i < meshesPerFrame && threadedMesher->hasFinishedMeshes(); ++i)
 	{
 		auto [coord, quads] = threadedMesher->fetchFinishedMesh();
@@ -110,6 +118,15 @@ void Scene::update(float deltaTime)
 			chunk->isQueued = false;
 		}
 	}
+
+
+	if (!threadedMesher->hasFinishedMeshes() && meshTimingStarted)
+	{
+		auto endTime = std::chrono::high_resolution_clock::now();
+		double totalMs = std::chrono::duration<double, std::milli>(endTime - meshStartTime).count();
+		std::cout << "Total meshing time so far: " << totalMs << " ms" << std::endl;
+	}
+
 }
 
 void Scene::markChunkDirty(const ChunkCoord& coord)
