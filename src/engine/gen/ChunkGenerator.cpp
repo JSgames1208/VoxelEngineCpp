@@ -13,13 +13,17 @@ ChunkGenerator::ChunkGenerator(Level* world)
 
 void ChunkGenerator::queueChunk(const ChunkCoord& coord)
 {
-	chunkQueue.push(coord);
+	{
+		std::lock_guard<std::mutex> lock(queueMutex);
+		chunkQueue.push(coord);
+	}
+	cv.notify_one();
 }
 
 void ChunkGenerator::start()
 {
-	int threadCount = std::min(4u, std::thread::hardware_concurrency());
 	running = true;
+	int threadCount = std::min(4u, std::thread::hardware_concurrency());
 	for (int i = 0; i < threadCount; i++)
 	{
 		workers.emplace_back(std::thread(&ChunkGenerator::workerLoop, this));
@@ -33,11 +37,17 @@ void ChunkGenerator::addDecorator(std::unique_ptr<IChunkDecorator> decorator)
 
 void ChunkGenerator::stop()
 {
-	running = false;
+	{
+		std::lock_guard<std::mutex> lock(queueMutex);
+		running = false;
+	}
+	cv.notify_all();
+
 	for (auto& t : workers)
 	{
 		if (t.joinable()) t.join();
 	}
+	workers.clear();
 }
 
 void ChunkGenerator::workerLoop()
@@ -47,7 +57,9 @@ void ChunkGenerator::workerLoop()
 		ChunkCoord coord;
 
 		{
-			std::lock_guard<std::mutex> lock(queueMutex);
+			std::unique_lock<std::mutex> lock(queueMutex);
+			cv.wait(lock, [&]() { return !chunkQueue.empty() || !running; });
+
 			if (chunkQueue.empty())
 			{
 				continue;
@@ -94,10 +106,10 @@ std::unique_ptr<Chunk> ChunkGenerator::generateChunk(const ChunkCoord& coord)
 	{
 		for (int z = 0; z < Chunk::SIZEZ; z++)
 		{
-			int wx = coord.x * Chunk::SIZEX + x;
-			int wz = coord.z * Chunk::SIZEZ + z;
-
 			int height = heights[x + z * Chunk::SIZEX];
+			int baseIndex = (x * Chunk::SIZEY) * Chunk::SIZEZ + z;
+
+			chunk->set(x, 0, z, BlockType::BEDROCK);
 
 			for (int y = 0; y < Chunk::SIZEY; y++)
 			{
@@ -121,6 +133,7 @@ std::unique_ptr<Chunk> ChunkGenerator::generateChunk(const ChunkCoord& coord)
 	{
 		decorator->decorate(*chunk, coord);
 	}
+
 
 	return chunk;
 }

@@ -28,7 +28,7 @@ Scene::Scene()
 	std::cout << "loaded generator and mesher" << std::endl;
 
 	// 6. Queue chunks
-	int renderDistance = 15;
+	int renderDistance = 25;
 	totalChunksToGenerate = (2 * renderDistance + 1) * (2 * renderDistance + 1);
 	for (int r = 0; r <= renderDistance; r++)
 		for (int x = -r; x <= r; x++)
@@ -78,13 +78,6 @@ void Scene::update(float deltaTime)
 		markChunkDirty({ coord.x, coord.z + 1 });
 		markChunkDirty({ coord.x, coord.z - 1 });
 
-		/*
-		markChunkDirty({ coord.x + 1, coord.z + 1 });
-		markChunkDirty({ coord.x - 1, coord.z + 1 });
-		markChunkDirty({ coord.x + 1, coord.z - 1 });
-		markChunkDirty({ coord.x - 1, coord.z - 1 });
-		*/
-
 		if (!meshTimingStarted)
 		{
 			meshStartTime = std::chrono::high_resolution_clock ::now();
@@ -108,7 +101,11 @@ void Scene::update(float deltaTime)
 		auto [coord, quads] = threadedMesher->fetchFinishedMesh();
 		if (!quads) continue;
 
+		auto t1 = std::chrono::high_resolution_clock::now();
 		auto mesh = threadedMesher->createMeshFromQuads(*quads);
+		auto t2 = std::chrono::high_resolution_clock::now();
+		//std::cout << "mesh from quads took: " << std::chrono::duration<double, std::milli>(t2 - t1).count() << " ms" << std::endl;
+
 		gpuUploadQueue.push({coord, std::move(mesh)});
 
 		Chunk* chunk = world->getChunkPtr(coord);
@@ -119,21 +116,28 @@ void Scene::update(float deltaTime)
 		}
 	}
 
-	int maxUploadsPerFrame = 5;
+	int maxUploadsPerFrame = 100;
 	for (int i = 0; i < maxUploadsPerFrame && !gpuUploadQueue.empty(); ++i)
 	{
+		auto t1 = std::chrono::high_resolution_clock::now();
+
 		auto [coord, mesh] = std::move(gpuUploadQueue.front());
 		gpuUploadQueue.pop();
 
 		chunkMeshes[coord] = std::make_unique<ChunkMesh>(std::move(mesh), coord);
+
+		auto t2 = std::chrono::high_resolution_clock::now();
+		//std::cout << "uploading took: " << std::chrono::duration<double, std::milli>(t2 - t1).count() << " ms" << std::endl;
 	}
 
+	/*
 	if (!threadedMesher->hasFinishedMeshes() && meshTimingStarted)
 	{
 		auto endTime = std::chrono::high_resolution_clock::now();
 		double totalMs = std::chrono::duration<double, std::milli>(endTime - meshStartTime).count();
 		std::cout << "Total meshing time so far: " << totalMs << " ms" << std::endl;
 	}
+	*/
 }
 
 void Scene::markChunkDirty(const ChunkCoord& coord)

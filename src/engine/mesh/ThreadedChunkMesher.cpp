@@ -125,7 +125,14 @@ void ThreadedChunkMesher::workerLoop()
 		Chunk* chunk = world->getChunkPtr(coord);
 		if (!chunk) continue;
 
+		auto t0 = std::chrono::high_resolution_clock::now();
 		auto quads = mesher->meshChunk(*chunk, coord, world);
+		auto t1 = std::chrono::high_resolution_clock::now();
+
+		//std::cout << "Chunk meshing took: "
+		//		  << std::chrono::duration<double, std::milli>(t1-t0).count()
+		//		  << " ms\n";
+
 
 		{
 			std::lock_guard<std::mutex> lock(finishedMutex);

@@ -43,7 +43,7 @@ public:
 	{
 		return seed;
 	}
+	std::vector<BlockType> blocks;
 private:
 	int seed;
-	std::vector<BlockType> blocks;
 };

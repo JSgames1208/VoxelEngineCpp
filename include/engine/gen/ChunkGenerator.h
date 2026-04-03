@@ -33,6 +33,7 @@ private:
 
 	std::queue<ChunkCoord> chunkQueue;
 	std::mutex queueMutex;
+	std::condition_variable cv;
 
 	std::queue<std::unique_ptr<Chunk>> generatedChunks;
 	std::mutex generatedMutex;
