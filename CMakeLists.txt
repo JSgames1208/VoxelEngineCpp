@@ -21,7 +21,7 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 add_subdirectory(external/glfw ${CMAKE_BINARY_DIR}/glfw_build)
 
-add_executable(${PROJECT_NAME} "src/engine/main/main.cpp" "src/engine/Engine.cpp" "src/engine/Shader.cpp" "src/engine/Camera.cpp" "src/engine/texture/Texture.cpp"
+add_executable(${PROJECT_NAME} "src/engine/main/main.cpp" "src/engine/Shader.cpp" "src/engine/Camera.cpp" "src/engine/texture/Texture.cpp"
 "src/engine/texture/TextureManager.cpp" "src/engine/mesh/Mesh.cpp" "src/engine/mesh/Meshmanager.cpp" "src/engine/renderer/block/BakedQuad.cpp" "src/engine/renderer/block/FaceBakery.cpp" "src/engine/texture/TextureAtlas.cpp" "src/engine/gen/ChunkGenerator.cpp" "include/engine/mesh/ThreadedChunkMesher.h" "src/engine/mesh/ThreadedChunkMesher.cpp" "src/engine/world/block/BlockHelpers.cpp"
 		src/engine/core/Vec3i.cpp
 		src/engine/world/level/LevelWriter.cpp
@@ -31,7 +31,9 @@ add_executable(${PROJECT_NAME} "src/engine/main/main.cpp" "src/engine/Engine.cpp
 		src/engine/VoxelGame.cpp
 		src/engine/platform/Window.cpp
 		src/engine/main/GameConfig.cpp
-		src/engine/platform/DisplayData.cpp)
+		src/engine/platform/DisplayData.cpp
+		src/engine/platform/KeyboardHandler.cpp
+		src/engine/platform/MouseHandler.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
 file(COPY ${CMAKE_SOURCE_DIR}/shaders DESTINATION ${CMAKE_BINARY_DIR})

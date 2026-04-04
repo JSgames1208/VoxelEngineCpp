@@ -7,3 +7,8 @@
 GameConfig::GameConfig(DisplayData displayData)
     : displayData(displayData)
 {}
+
+const DisplayData &GameConfig::getDisplayData() const
+{
+    return displayData;
+}

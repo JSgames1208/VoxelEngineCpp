@@ -9,6 +9,7 @@ class GameConfig
 {
 public:
     GameConfig(DisplayData displayData);
+    const DisplayData& getDisplayData() const;
 private:
-    DisplayData displayData;
+    const DisplayData displayData;
 };

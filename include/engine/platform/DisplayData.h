@@ -8,7 +8,7 @@ class DisplayData
 {
 public:
     DisplayData(int width, int height);
-private:
     int width;
     int height;
+private:
 };
