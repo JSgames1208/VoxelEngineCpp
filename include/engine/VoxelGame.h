@@ -20,6 +20,7 @@
 #include "engine/core/ChunkCoord.h"
 #include "engine/gen/ChunkGenerator.h"
 #include "engine/mesh/ThreadedChunkMesher.h"
+#include "engine/main/GameConfig.h"
 #include <chrono>
 
 
@@ -38,7 +39,7 @@ struct ChunkMesh
 class VoxelGame : public Game
 {
 public:
-    VoxelGame();
+    VoxelGame(const GameConfig& gameConfig);
     ~VoxelGame();
 
     void update(float deltaTime);

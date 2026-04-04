@@ -11,15 +11,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 #include <memory>
-#include "engine/scene/Scene.h"
 #include "engine/texture/TextureManager.h"
 #include "engine/mesh/MeshManager.h"
+#include "VoxelGame.h"
 
 class Engine
 {
 public:
 	Engine();
-	int run();
+	int run(VoxelGame& game);
 	int init();
 private:
 	void update(float deltaTime);
@@ -40,7 +40,7 @@ private:
 	std::unique_ptr<Texture> texture;
 	std::unique_ptr<Mesh> mesh;
 
-	std::unique_ptr<Scene> scene;
+	VoxelGame* game;
 	std::unique_ptr<TextureManager> textureManager;
 	std::unique_ptr<MeshManager> meshManager;
 

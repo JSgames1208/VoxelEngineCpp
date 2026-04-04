@@ -6,7 +6,6 @@ int frameCount = 0;
 
 Engine::Engine()
 {
-	init();
 }
 
 int Engine::init()
@@ -53,8 +52,6 @@ int Engine::init()
 
 	setupCallbacks();
 
-	scene = std::make_unique<Scene>();
-
 	shader->use();
 	glm::mat4 model = glm::mat4(1.0f);
 
@@ -65,8 +62,11 @@ int Engine::init()
 	return 0;
 }
 
-int Engine::run()
+int Engine::run(VoxelGame& game)
 {
+    this->game = &game;
+	init();
+
 	while (!glfwWindowShouldClose(window))
 	{
 		float currentFrame = static_cast<float>(glfwGetTime());
@@ -100,7 +100,7 @@ int Engine::run()
 
 void Engine::update(float deltaTime)
 {
-	// Update game logic here
+	if (game) game->update(deltaTime);
 }
 
 void Engine::render()
@@ -118,8 +118,7 @@ void Engine::render()
 	projection = glm::perspective(glm::radians(90.0f), sizex / sizey, 0.1f, 1000.0f);
 	shader->setMat4("projection", projection);
 
-	scene->update(deltaTime);
-	scene->render(*shader);
+	game->render(*shader);
 }
 
 void Engine::processInput()

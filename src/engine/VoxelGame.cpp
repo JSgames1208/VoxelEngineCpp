@@ -7,7 +7,7 @@
 #include "engine/gen/decorators/TreeDecorator.h"
 #include "engine/gen/decorators/RockClumpDecorator.h"
 
-VoxelGame::VoxelGame()
+VoxelGame::VoxelGame(const GameConfig& gameConfig)
 {
     world = std::make_unique<Level>();
 
