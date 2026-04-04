@@ -64,7 +64,7 @@ public:
 
         auto getBlock = [&](int x, int y, int z) -> BlockType
         {
-            if (y < 0) return BlockType::BEDROCK;
+            if (y < 0) return BlockType::AIR;
             if (y >= Chunk::SIZEY) return BlockType::AIR;
 
             int cx = 1, cz = 1;
@@ -106,11 +106,16 @@ public:
                         bool w = isSolid(x - 1, y + 1, z);
                         bool e = isSolid(x + 1, y + 1, z);
 
+                        bool nw = isSolid(x - 1, y + 1, z - 1);
+                        bool ne = isSolid(x + 1, y + 1, z - 1);
+                        bool sw = isSolid(x - 1, y + 1, z + 1);
+                        bool se = isSolid(x + 1, y + 1, z + 1);
+
                         float ao[4];
-                        ao[0] = getAO(w, n, false);
-                        ao[1] = getAO(e, n, false);
-                        ao[2] = getAO(e, s, false);
-                        ao[3] = getAO(w, s, false);
+                        ao[0] = getAO(w, n, nw);
+                        ao[1] = getAO(e, n, ne);
+                        ao[2] = getAO(e, s, se);
+                        ao[3] = getAO(w, s, sw);
 
                         quads.push_back(faceBakery.bakeQuad(min, max, Direction::UP, type, ao, atlas));
                     }
@@ -123,11 +128,16 @@ public:
                         bool w = isSolid(x - 1, y - 1, z);
                         bool e = isSolid(x + 1, y - 1, z);
 
+                        bool nw = isSolid(x - 1, y - 1, z - 1);
+                        bool ne = isSolid(x + 1, y - 1, z - 1);
+                        bool sw = isSolid(x - 1, y - 1, z + 1);
+                        bool se = isSolid(x + 1, y - 1, z + 1);
+
                         float ao[4];
-                        ao[0] = getAO(w, s, false);
-                        ao[1] = getAO(e, s, false);
-                        ao[2] = getAO(e, n, false);
-                        ao[3] = getAO(w, n, false);
+                        ao[0] = getAO(w, s, sw);
+                        ao[1] = getAO(e, s, se);
+                        ao[2] = getAO(e, n, ne);
+                        ao[3] = getAO(w, n, nw);
 
                         quads.push_back(faceBakery.bakeQuad(min, max, Direction::DOWN, type, ao, atlas));
                     }
@@ -140,11 +150,16 @@ public:
                         bool w = isSolid(x - 1, y, z - 1);
                         bool e = isSolid(x + 1, y, z - 1);
 
+                        bool uw = isSolid(x - 1, y + 1, z - 1);
+                        bool ue = isSolid(x + 1, y + 1, z - 1);
+                        bool dw = isSolid(x - 1, y - 1, z - 1);
+                        bool de = isSolid(x + 1, y - 1, z - 1);
+
                         float ao[4];
-                        ao[0] = getAO(w, d, false);
-                        ao[1] = getAO(e, d, false);
-                        ao[2] = getAO(e, u, false);
-                        ao[3] = getAO(w, u, false);
+                        ao[0] = getAO(w, d, dw);
+                        ao[1] = getAO(e, d, de);
+                        ao[2] = getAO(e, u, ue);
+                        ao[3] = getAO(w, u, uw);
 
                         quads.push_back(faceBakery.bakeQuad(min, max, Direction::NORTH, type, ao, atlas));
                     }
@@ -157,11 +172,16 @@ public:
                         bool w = isSolid(x - 1, y, z + 1);
                         bool e = isSolid(x + 1, y, z + 1);
 
+                        bool uw = isSolid(x - 1, y + 1, z + 1);
+                        bool ue = isSolid(x + 1, y + 1, z + 1);
+                        bool dw = isSolid(x - 1, y - 1, z + 1);
+                        bool de = isSolid(x + 1, y - 1, z + 1);
+
                         float ao[4];
-                        ao[0] = getAO(e, d, false);
-                        ao[1] = getAO(w, d, false);
-                        ao[2] = getAO(w, u, false);
-                        ao[3] = getAO(e, u, false);
+                        ao[0] = getAO(e, d, de);
+                        ao[1] = getAO(w, d, dw);
+                        ao[2] = getAO(w, u, uw);
+                        ao[3] = getAO(e, u, ue);
 
                         quads.push_back(faceBakery.bakeQuad(min, max, Direction::SOUTH, type, ao, atlas));
                     }
@@ -174,11 +194,16 @@ public:
                         bool n = isSolid(x - 1, y, z - 1);
                         bool s = isSolid(x - 1, y, z + 1);
 
+                        bool un = isSolid(x - 1, y + 1, z - 1);
+                        bool us = isSolid(x - 1, y + 1, z + 1);
+                        bool dn = isSolid(x - 1, y - 1, z - 1);
+                        bool ds = isSolid(x - 1, y - 1, z + 1);
+
                         float ao[4];
-                        ao[0] = getAO(s, d, false);
-                        ao[1] = getAO(n, d, false);
-                        ao[2] = getAO(n, u, false);
-                        ao[3] = getAO(s, u, false);
+                        ao[0] = getAO(s, d, ds);
+                        ao[1] = getAO(n, d, dn);
+                        ao[2] = getAO(n, u, un);
+                        ao[3] = getAO(s, u, us);
 
                         quads.push_back(faceBakery.bakeQuad(min, max, Direction::WEST, type, ao, atlas));
                     }
@@ -191,11 +216,16 @@ public:
                         bool n = isSolid(x + 1, y, z - 1);
                         bool s = isSolid(x + 1, y, z + 1);
 
+                        bool un = isSolid(x + 1, y + 1, z - 1);
+                        bool us = isSolid(x + 1, y + 1, z + 1);
+                        bool dn = isSolid(x + 1, y - 1, z - 1);
+                        bool ds = isSolid(x + 1, y - 1, z + 1);
+
                         float ao[4];
-                        ao[0] = getAO(n, d, false);
-                        ao[1] = getAO(s, d, false);
-                        ao[2] = getAO(s, u, false);
-                        ao[3] = getAO(n, u, false);
+                        ao[0] = getAO(n, d, dn);
+                        ao[1] = getAO(s, d, ds);
+                        ao[2] = getAO(s, u, us);
+                        ao[3] = getAO(n, u, un);
 
                         quads.push_back(faceBakery.bakeQuad(min, max, Direction::EAST, type, ao, atlas));
                     }

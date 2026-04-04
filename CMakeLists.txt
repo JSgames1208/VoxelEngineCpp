@@ -27,7 +27,8 @@ add_executable(${PROJECT_NAME} "src/engine/main.cpp" "src/engine/Engine.cpp" "sr
 		src/engine/world/level/LevelWriter.cpp
 		src/engine/world/level/feature/Feature.cpp
 		src/engine/world/level/feature/FeatureGenerator.cpp
-		src/engine/mesh/ThreadedMeshCreator.cpp)
+		src/engine/mesh/ThreadedMeshCreator.cpp
+		src/engine/VoxelGame.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
 file(COPY ${CMAKE_SOURCE_DIR}/shaders DESTINATION ${CMAKE_BINARY_DIR})
