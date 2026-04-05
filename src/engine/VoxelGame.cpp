@@ -67,12 +67,16 @@ int VoxelGame::initWindow()
         return -1;
     }
 
+    const DisplayData& displayData = gameConfig.getDisplayData();
     window = std::make_unique<Window>(gameConfig.getDisplayData(), "~~3D Voxel Engine~~");
     if (!window || !window->getHandle())
     {
         std::cout << "Window creation failed!" << std::endl;
         return -1;
     }
+
+    sizex = displayData.width;
+    sizey = displayData.height;
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cerr << "Failed to initialize GLAD!" << std::endl;
