@@ -33,7 +33,8 @@ add_executable(${PROJECT_NAME} "src/engine/main/main.cpp" "src/engine/Shader.cpp
 		src/engine/main/GameConfig.cpp
 		src/engine/platform/DisplayData.cpp
 		src/engine/platform/KeyboardHandler.cpp
-		src/engine/platform/MouseHandler.cpp)
+		src/engine/platform/MouseHandler.cpp
+		src/engine/core/Logger.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
 file(COPY ${CMAKE_SOURCE_DIR}/shaders DESTINATION ${CMAKE_BINARY_DIR})

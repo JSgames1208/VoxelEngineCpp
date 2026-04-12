@@ -8,6 +8,7 @@
 #include "engine/world/Level.h"
 #include "engine/gen/decorators/TreeDecorator.h"
 #include "engine/gen/decorators/RockClumpDecorator.h"
+#include "Profiler.h"
 
 double fpsTimer = 0.0;
 int frameCount = 0;
@@ -112,6 +113,7 @@ int VoxelGame::run()
 
     while (!glfwWindowShouldClose(window->getHandle()))
     {
+        profiler::Profiler::get().beginFrame();
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -135,6 +137,7 @@ int VoxelGame::run()
 
         glfwSwapBuffers(window->getHandle());
         glfwPollEvents();
+        profiler::Profiler::get().endFrame();
     }
 
     glfwTerminate();
@@ -165,6 +168,7 @@ Camera* VoxelGame::getCamera()
 
 void VoxelGame::update(float deltaTime)
 {
+    PROFILE_SCOPE("update");
     while (generator->hasGeneratedChunks()) {
         auto chunk = generator->fetchGeneratedChunk();
         if (!chunk) continue;
@@ -238,18 +242,14 @@ void VoxelGame::update(float deltaTime)
         }
     }
 
+
     int maxUploadsPerFrame = 1000;
     for (int i = 0; i < maxUploadsPerFrame && !gpuUploadQueue.empty(); ++i)
     {
-        auto t1 = std::chrono::high_resolution_clock::now();
-
         auto [coord, mesh] = std::move(gpuUploadQueue.front());
         gpuUploadQueue.pop();
 
         chunkMeshes[coord] = std::make_unique<ChunkMesh>(std::move(mesh), coord);
-
-        auto t2 = std::chrono::high_resolution_clock::now();
-        //std::cout << "uploading took: " << std::chrono::duration<double, std::milli>(t2 - t1).count() << " ms" << std::endl;
     }
 }
 
@@ -271,6 +271,7 @@ void VoxelGame::updateChunkMesh(const ChunkCoord& coord, std::unique_ptr<Mesh> m
 
 void VoxelGame::render()
 {
+    PROFILE_SCOPE("render");
     glClearColor(130.0f / 256.0f, 200.0f / 256.0f, 229.0f / 256.0f, 1.0f);
     //glClearColor(255.0f / 256.0f, 45.0f / 256.0f, 209.0f / 256.0f, 1.0f); // CURSED PURPLE (:<
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

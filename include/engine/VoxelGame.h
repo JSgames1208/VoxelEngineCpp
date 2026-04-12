@@ -30,7 +30,6 @@
 #include "engine/platform/MouseHandler.h"
 #include <chrono>
 
-
 struct ChunkMesh
 {
     ChunkMesh(std::unique_ptr<Mesh> _mesh, const ChunkCoord& _coord)
